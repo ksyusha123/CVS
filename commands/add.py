@@ -1,9 +1,7 @@
 import hashlib
 import pickle
-import os
 from pathlib import Path
 import click
-import json
 
 
 def add(file, directory):

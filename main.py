@@ -1,5 +1,6 @@
 from commands.add import add
 from commands.init import init
+from commands.commit import CommitCommand
 from Directory import Directory
 
 from pathlib import Path
@@ -17,6 +18,8 @@ def main(directory):
         command = input()
         if command == 'init':
             init(directory)
+        elif command == 'commit':
+            CommitCommand(directory, 's').commit()
         else:
             add(command.split()[1], directory)
 
