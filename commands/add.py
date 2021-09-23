@@ -4,6 +4,7 @@ from pathlib import Path
 import click
 
 
+
 def add(file, directory):
     if not directory.is_repository:
         print("Create a repository")

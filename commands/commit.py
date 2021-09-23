@@ -1,5 +1,7 @@
-from pathlib import Path
 import click
+import os
+import hashlib
+from pathlib import Path
 from checksumdir import dirhash
 
 
@@ -11,6 +13,7 @@ class CommitCommand:
     def commit(self):
         repository_hash = dirhash(self.repository.path, 'sha1')
         self._make_graph(self.repository.path, repository_hash)
+        self._create_commit_object(repository_hash)
 
     def _make_graph(self, current_directory, current_dir_hash):
         with open(Path(self.repository.objects / current_dir_hash), 'w')\
@@ -35,3 +38,18 @@ class CommitCommand:
                 index_file_info = line.split()
                 if file.name == index_file_info[0]:
                     return index_file_info
+
+    def _create_commit_object(self, root_hash):
+        with open(Path(self.repository.objects/'tmp'), 'w') as commit:
+            commit.write(f"tree {root_hash}\n\n{self.message}")
+        commit_hash = self._calculate_hash(Path(self.repository.objects/'tmp'))
+        os.rename(Path(self.repository.objects/'tmp'),
+                  Path(self.repository.objects/commit_hash))
+
+    @staticmethod
+    def _calculate_hash(file_path):
+        with open(file_path, 'rb') as binary_file:
+            hash = hashlib.sha1(binary_file.read()).hexdigest()
+        return hash
+
+
