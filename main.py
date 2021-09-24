@@ -1,4 +1,4 @@
-from commands.add import add
+from commands.add import AddCommand
 from commands.init import init
 from commands.commit import CommitCommand
 from Directory import Directory
@@ -21,7 +21,7 @@ def main(directory):
         elif command == 'commit':
             CommitCommand(directory, 's').commit()
         else:
-            add(command.split()[1], directory)
+            AddCommand(command.split()[1], directory).add()
 
 
 if __name__ == '__main__':

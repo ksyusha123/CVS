@@ -13,7 +13,9 @@ class CommitCommand:
     def commit(self):
         repository_hash = dirhash(self.repository.path, 'sha1')
         self._make_graph(self.repository.path, repository_hash)
-        self._create_commit_object(repository_hash)
+        commit_hash = self._create_commit_object(repository_hash)
+        self._direct_head(commit_hash)
+        self._clear_index()
 
     def _make_graph(self, current_directory, current_dir_hash):
         with open(Path(self.repository.objects / current_dir_hash), 'w')\
@@ -36,7 +38,7 @@ class CommitCommand:
         with open(self.repository.index) as index:
             for line in index:
                 index_file_info = line.split()
-                if file.name == index_file_info[0]:
+                if file == Path(self.repository.path/index_file_info[0]):
                     return index_file_info
 
     def _create_commit_object(self, root_hash):
@@ -45,6 +47,7 @@ class CommitCommand:
         commit_hash = self._calculate_hash(Path(self.repository.objects/'tmp'))
         os.rename(Path(self.repository.objects/'tmp'),
                   Path(self.repository.objects/commit_hash))
+        return commit_hash
 
     @staticmethod
     def _calculate_hash(file_path):
@@ -52,4 +55,10 @@ class CommitCommand:
             hash = hashlib.sha1(binary_file.read()).hexdigest()
         return hash
 
+    def _direct_head(self, commit_hash):
+        with open(self.repository.head, 'w') as head:
+            head.write(commit_hash)
 
+    def _clear_index(self):
+        with open(self.repository.index, 'w') as index:
+            pass

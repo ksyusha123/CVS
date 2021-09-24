@@ -8,3 +8,4 @@ class Directory:
         self.cvs = Path(path/'.cvs')
         self.objects = Path(self.cvs/'objects')
         self.index = Path(self.cvs/'index')
+        self.head = Path(self.cvs/'HEAD')

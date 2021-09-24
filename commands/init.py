@@ -10,9 +10,11 @@ def init(directory):
             print("Can't create a repository")
 
         directory.is_repository = True
-        directory.cvs = Path(directory.path/'.cvs')
 
-        Path(directory.cvs/'HEAD').mkdir()
+        with open(directory.head, 'w') as head:
+            pass
         Path(directory.cvs/'objects').mkdir()
+        with open(directory.index, 'w') as index:
+            pass
     else:
         print("Repository exists")
