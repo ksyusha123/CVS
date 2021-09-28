@@ -15,7 +15,7 @@ class CommitCommand:
         self._make_graph(self.repository.path, repository_hash)
         commit_hash = self._create_commit_object(repository_hash)
         self._direct_head(commit_hash)
-        self._clear_index()
+        # self._clear_index()
 
     def _make_graph(self, current_directory, current_dir_hash):
         with open(Path(self.repository.objects / current_dir_hash), 'w')\
@@ -42,12 +42,23 @@ class CommitCommand:
                     return index_file_info
 
     def _create_commit_object(self, root_hash):
+        parent = self._find_parent_commit()
         with open(Path(self.repository.objects/'tmp'), 'w') as commit:
-            commit.write(f"tree {root_hash}\n\n{self.message}")
+            commit.write(f"tree {root_hash}\n")
+            if parent is not None:
+                commit.write(f"parent {parent}\n")
+            commit.write(f"{self.message}")
         commit_hash = self._calculate_hash(Path(self.repository.objects/'tmp'))
         os.rename(Path(self.repository.objects/'tmp'),
                   Path(self.repository.objects/commit_hash))
         return commit_hash
+
+    def _find_parent_commit(self):
+        parent = None
+        if self.repository.head.exists():
+            with open(self.repository.head) as head:
+                parent = head.readline()
+        return parent
 
     @staticmethod
     def _calculate_hash(file_path):
@@ -59,6 +70,6 @@ class CommitCommand:
         with open(self.repository.head, 'w') as head:
             head.write(commit_hash)
 
-    def _clear_index(self):
-        with open(self.repository.index, 'w') as index:
-            pass
+    # def _clear_index(self):
+    #     with open(self.repository.index, 'w') as index:
+    #         pass
