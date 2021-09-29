@@ -15,7 +15,6 @@ class CommitCommand:
         self._make_graph(self.repository.path, repository_hash)
         commit_hash = self._create_commit_object(repository_hash)
         self._direct_head(commit_hash)
-        # self._clear_index()
 
     def _make_graph(self, current_directory, current_dir_hash):
         with open(Path(self.repository.objects / current_dir_hash), 'w')\
@@ -46,7 +45,7 @@ class CommitCommand:
         with open(Path(self.repository.objects/'tmp'), 'w') as commit:
             commit.write(f"tree {root_hash}\n")
             if parent is not None:
-                commit.write(f"parent {parent}\n")
+                commit.write(f"parent {parent}\n\n")
             commit.write(f"{self.message}")
         commit_hash = self._calculate_hash(Path(self.repository.objects/'tmp'))
         os.rename(Path(self.repository.objects/'tmp'),
@@ -55,9 +54,10 @@ class CommitCommand:
 
     def _find_parent_commit(self):
         parent = None
-        if self.repository.head.exists():
-            with open(self.repository.head) as head:
-                parent = head.readline()
+        with open(self.repository.head) as head:
+            current_commit = head.readline()
+            if current_commit != "":
+                parent = current_commit
         return parent
 
     @staticmethod
@@ -69,7 +69,3 @@ class CommitCommand:
     def _direct_head(self, commit_hash):
         with open(self.repository.head, 'w') as head:
             head.write(commit_hash)
-
-    # def _clear_index(self):
-    #     with open(self.repository.index, 'w') as index:
-    #         pass

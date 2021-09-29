@@ -1,6 +1,8 @@
 from commands.add import AddCommand
 from commands.init import init
 from commands.commit import CommitCommand
+from commands.log import LogCommand
+from commands.reset import ResetCommand
 from Directory import Directory
 
 from pathlib import Path
@@ -15,13 +17,17 @@ def main(directory):
         directory.cvs = Path(directory.path/'.cvs')
         directory.is_repository = True
     while True:
-        command = input()
-        if command == 'init':
+        command = input().split()
+        if command[0] == 'init':
             init(directory)
-        elif command == 'commit':
-            CommitCommand(directory, 's').commit()
+        elif command[0] == 'commit':
+            CommitCommand(directory, command[1]).commit()
+        elif command[0] == 'log':
+            LogCommand(directory).log()
+        elif command[0] == 'reset':
+            ResetCommand(directory, command[1]).reset()
         else:
-            AddCommand(command.split()[1], directory).add()
+            AddCommand(command[1], directory).add()
 
 
 if __name__ == '__main__':
