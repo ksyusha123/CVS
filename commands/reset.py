@@ -45,4 +45,4 @@ class ResetCommand:
                         current_file:
                     with open(Path(self.repository.objects/hash)) as \
                             old_file:
-                        current_file.writelines(old_file.readlines())
+                        current_file.write(old_file.read())
