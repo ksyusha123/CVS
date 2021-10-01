@@ -11,7 +11,7 @@ class Repository:
 
     @property
     def is_initialised(self):
-        return Path(self.path/'cvs').exists()
+        return Path(self.path/'.cvs').exists()
 
     def init_paths(self):
         self.cvs = Path(self.path / '.cvs')

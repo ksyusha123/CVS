@@ -1,6 +1,7 @@
 from pathlib import Path
-from Repository import Repository
 import click
+
+from Repository import Repository
 
 
 @click.command()

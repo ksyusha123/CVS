@@ -1,20 +1,20 @@
 from pathlib import Path
-import json
+import click
+
+from Repository import Repository
 
 
-def init(directory):
-    if not directory.is_repository:
-        try:
-            Path(directory.path/'.cvs').mkdir()
-        except OSError:
-            print("Can't create a repository")
-
-        directory.is_repository = True
-
-        with open(directory.head, 'w') as head:
-            pass
-        Path(directory.cvs/'objects').mkdir()
-        with open(directory.index, 'w') as index:
-            pass
+@click.command()
+def init():
+    repository = Repository(Path.cwd())
+    if repository.is_initialised:
+        click.echo("Repository already exists")
     else:
-        print("Repository exists")
+        repository.init_paths()
+        Path(repository.path/'.cvs').mkdir()
+        with open(repository.head, 'w') as head:
+            pass
+        Path(repository.cvs/'objects').mkdir()
+        with open(repository.index, 'w') as index:
+            pass
+        click.echo("Repository has been created successfully")
