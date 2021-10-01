@@ -11,11 +11,11 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'init = commands.scripts.init:cli',
-            'add = commands.scripts.add:cli',
-            'commit = commands.scripts.commit:cli',
-            'log = commands.scripts.log:cli',
-            'reset = commands.scripts.reset:cli'
+            'init = commands.init:cli',
+            'add = commands.add:cli',
+            'commit = commands.commit:cli',
+            'log = commands.log:log',
+            'reset = commands.reset:cli'
         ],
     },
 )

@@ -1,24 +1,29 @@
 from pathlib import Path
+from Repository import Repository
+import click
 
 
-class LogCommand:
-    def __init__(self, repository):
-        self.repository = repository
-
-    def log(self):
-        if not self.repository.head.exists():
-            print("No commits yet")
+@click.command()
+def log():
+    repository = Repository(Path.cwd())
+    if not repository.is_initialised:
+        click.echo("Init a repository first")
+    else:
+        repository.init_paths()
+        if not repository.head.exists():
+            click.echo("No commits yet")
         else:
-            with open(self.repository.head) as head:
+            with open(repository.head) as head:
                 commit = head.readline()
-                self._print_commits_tree(commit)
+                _print_commits_tree(commit, repository)
 
-    def _print_commits_tree(self, commit):
-        while True:
-            with open(Path(self.repository.objects / commit)) as commit_obj:
-                lines = commit_obj.readlines()
-                print(f"{commit} {lines[-1]}")
-                if len(lines) == 4:
-                    commit = lines[1].split()[1]
-                else:
-                    break
+
+def _print_commits_tree(commit, repository):
+    while True:
+        with open(Path(repository.objects / commit)) as commit_obj:
+            lines = commit_obj.readlines()
+            print(f"{commit} {lines[-1]}")
+            if len(lines) == 4:
+                commit = lines[1].split()[1]
+            else:
+                break

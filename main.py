@@ -3,16 +3,16 @@ from commands.init import init
 from commands.commit import CommitCommand
 from commands.log import LogCommand
 from commands.reset import ResetCommand
-from Directory import Directory
+from Repository import Repository
 
 from pathlib import Path
 import click
 
 
-# @click.command()
-# @click.argument('directory')
+@click.command()
+@click.argument('directory')
 def main(directory):
-    directory = Directory(Path(directory))
+    directory = Repository(Path(directory))
     if Path(directory.path/'.cvs').exists():
         directory.cvs = Path(directory.path/'.cvs')
         directory.is_repository = True
