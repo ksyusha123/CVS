@@ -11,7 +11,7 @@ def add(file):
     if not repository.is_initialised:
         click.echo("Init a repository first")
     else:
-        repository.init_paths()
+        repository.init_required_paths()
         hash = _calculate_hash(repository, file)
         _create_blob(hash, repository, file)
         _add_to_index(hash, repository, file)

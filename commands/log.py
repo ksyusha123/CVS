@@ -10,10 +10,11 @@ def log():
     if not repository.is_initialised:
         click.echo("Init a repository first")
     else:
-        repository.init_paths()
-        if not repository.head.exists():
+        repository.init_required_paths()
+        if not repository.has_commits():
             click.echo("No commits yet")
         else:
+            repository.init_head()
             with open(repository.head) as head:
                 commit = head.readline()
                 _print_commits_tree(commit, repository)

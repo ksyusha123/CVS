@@ -11,11 +11,16 @@ class Repository:
 
     @property
     def is_initialised(self):
-        return Path(self.path/'.cvs').exists()
+        return Path(self.path / '.cvs').exists()
 
-    def init_paths(self):
+    def has_commits(self):
+        return Path(self.cvs / 'HEAD').exists()
+
+    def init_required_paths(self):
         self.cvs = Path(self.path / '.cvs')
         self.objects = Path(self.cvs / 'objects')
         self.index = Path(self.cvs / 'index')
+
+    def init_head(self):
         self.head = Path(self.cvs / 'HEAD')
 

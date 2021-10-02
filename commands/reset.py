@@ -1,48 +1,56 @@
 from pathlib import Path
+import click
+
+from Repository import Repository
 
 
-class ResetCommand:
-    def __init__(self, repository, commit):
-        self.repository = repository
-        self.commit = commit
+@click.command()
+@click.argument('commit', required=True)
+def reset(commit):
+    repository = Repository(Path.cwd())
+    if not repository.is_initialised:
+        click.echo("Init a repository first")
+    else:
+        repository.init_required_paths()
+        _replace_head(repository, commit)
+        _update_index(repository, commit)
+        _update_working_directory(repository)
 
-    def reset(self):
-        self._replace_head()
-        self._update_index()
-        self._update_working_directory()
 
-    def _replace_head(self):
-        with open(self.repository.head) as head:
-            previous_commit = head.readline()
-        with open(self.repository.head, 'w') as head:
-            with open(Path(self.repository.cvs/'ORIG_HEAD'), 'w') as orig_head:
-                orig_head.write(previous_commit)
-                head.write(self.commit)
+def _replace_head(repository, commit):
+    with open(repository.head) as head:
+        previous_commit = head.readline()
+    with open(repository.head, 'w') as head:
+        with open(Path(repository.cvs/'ORIG_HEAD'), 'w') as orig_head:
+            orig_head.write(previous_commit)
+            head.write(commit)
 
-    def _update_index(self):
-        old_commit_index = []
-        with open(Path(self.repository.objects / self.commit)) as commit_obj:
-            self._get_files(commit_obj.readline().split()[1], old_commit_index)
-        with open(self.repository.index, 'w') as index:
-            index.writelines(old_commit_index)
 
-    def _get_files(self, tree, old_commit_index):
-        with open(Path(self.repository.objects / tree)) as tree_file:
-            for line in tree_file:
-                obj_data = line.split()
-                obj_type, hash = obj_data[0], obj_data[1]
-                if obj_type == 'blob':
-                    old_commit_index.append(line)
-                else:
-                    self._get_files(hash, old_commit_index)
+def _update_index(repository, commit):
+    old_commit_index = []
+    with open(Path(repository.objects / commit)) as commit_obj:
+        _get_files(
+            commit_obj.readline().split()[1], old_commit_index, repository)
+    with open(repository.index, 'w') as index:
+        index.writelines(old_commit_index)
 
-    def _update_working_directory(self):
-        with open(self.repository.index) as index:
-            for indexed_file in index:
-                file_data = indexed_file.split()
-                type, hash, name = file_data[0], file_data[1], file_data[2]
-                with open(Path(self.repository.path/name), 'w') as \
-                        current_file:
-                    with open(Path(self.repository.objects/hash)) as \
-                            old_file:
-                        current_file.write(old_file.read())
+
+def _get_files(tree, old_commit_index, repository):
+    with open(Path(repository.objects / tree)) as tree_file:
+        for line in tree_file:
+            obj_data = line.split()
+            obj_type, hash = obj_data[0], obj_data[1]
+            if obj_type == 'blob':
+                old_commit_index.append(line)
+            else:
+                _get_files(hash, old_commit_index, repository)
+
+
+def _update_working_directory(repository):
+    with open(repository.index) as index:
+        for indexed_file in index:
+            file_data = indexed_file.split()
+            type, hash, name = file_data[0], file_data[1], file_data[2]
+            with open(Path(repository.path/name), 'w') as current_file:
+                with open(Path(repository.objects/hash)) as old_file:
+                    current_file.write(old_file.read())
