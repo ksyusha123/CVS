@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 import click
 
-from Repository import Repository
+from repository import Repository
 
 
 @click.command()

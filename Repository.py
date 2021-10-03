@@ -20,6 +20,8 @@ class Repository:
         self.cvs = Path(self.path / '.cvs')
         self.objects = Path(self.cvs / 'objects')
         self.index = Path(self.cvs / 'index')
+        Path(self.cvs).mkdir(parents=True, exist_ok=True)
+        Path(self.objects).mkdir(parents=True, exist_ok=True)
 
     def init_head(self):
         self.head = Path(self.cvs / 'HEAD')

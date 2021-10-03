@@ -5,7 +5,7 @@ import hashlib
 from pathlib import Path
 from checksumdir import dirhash
 
-from Repository import Repository
+from repository import Repository
 
 
 @click.command()
@@ -30,7 +30,7 @@ def _make_graph(current_directory, current_dir_hash, repository):
     with open(Path(repository.objects / current_dir_hash), 'w')\
             as tree_file:
         for obj in current_directory.iterdir():
-            if obj == Path(current_directory/'.cvs'):
+            if obj == repository.cvs:
                 continue
             if obj.is_dir():
                 obj_hash = dirhash(current_directory, 'sha1')

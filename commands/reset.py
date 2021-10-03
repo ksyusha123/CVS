@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 import zlib
 
-from Repository import Repository
+from repository import Repository
 
 
 @click.command()
