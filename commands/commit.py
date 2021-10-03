@@ -1,3 +1,4 @@
+import sys
 import click
 import os
 import hashlib
@@ -14,15 +15,15 @@ def commit(message):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-    else:
-        repository.init_required_paths()
-        if repository.has_commits():
-            repository.init_head()
-        repository_hash = dirhash(repository.path, 'sha1')
-        _make_graph(repository.path, repository_hash, repository)
-        commit_hash = _create_commit_object(
-            repository_hash, repository, message)
-        _direct_head(commit_hash, repository)
+        sys.exit()
+    repository.init_required_paths()
+    if repository.has_commits():
+        repository.init_head()
+    repository_hash = dirhash(repository.path, 'sha1')
+    _make_graph(repository.path, repository_hash, repository)
+    commit_hash = _create_commit_object(
+        repository_hash, repository, message)
+    _direct_head(commit_hash, repository)
 
 
 def _make_graph(current_directory, current_dir_hash, repository):

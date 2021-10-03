@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 import click
 
@@ -9,15 +10,15 @@ def log():
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-    else:
-        repository.init_required_paths()
-        if not repository.has_commits():
-            click.echo("No commits yet")
-        else:
-            repository.init_head()
-            with open(repository.head) as head:
-                commit = head.readline()
-                _print_commits_tree(commit, repository)
+        sys.exit()
+    repository.init_required_paths()
+    if not repository.has_commits():
+        click.echo("No commits yet")
+        sys.exit()
+    repository.init_head()
+    with open(repository.head) as head:
+        commit = head.readline()
+        _print_commits_tree(commit, repository)
 
 
 def _print_commits_tree(commit, repository):

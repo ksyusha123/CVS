@@ -1,3 +1,4 @@
+import sys
 import hashlib
 from pathlib import Path
 import click
@@ -12,11 +13,11 @@ def add(file):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-    else:
-        repository.init_required_paths()
-        hash = _calculate_hash(repository, file)
-        _create_blob(hash, repository, file)
-        _add_to_index(hash, repository, file)
+        sys.exit()
+    repository.init_required_paths()
+    hash = _calculate_hash(repository, file)
+    _create_blob(hash, repository, file)
+    _add_to_index(hash, repository, file)
 
 
 def _calculate_hash(repository, file):

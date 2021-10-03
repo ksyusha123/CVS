@@ -21,10 +21,10 @@
 - файл, с помощью которого из консоли можно вызывать модули: setup.py  
 
 ## Установка    
-1.	pip install virtualenv  
-2.	virtualenv venv  
-3.  venv/bin/activate  
-4.  pip install --editable .  
+pip install virtualenv  
+virtualenv venv  
+venv/bin/activate  
+pip install --editable .  
 
 ## Использование  
 Из консоли нужно вводить команды, начиная с cvs.   

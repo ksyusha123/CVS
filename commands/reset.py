@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 import click
 import zlib
@@ -11,15 +12,15 @@ def reset(commit):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-    else:
-        repository.init_required_paths()
-        if not repository.has_commits():
-            click.echo("No commits yet")
-        else:
-            repository.init_head()
-            _replace_head(repository, commit)
-            _update_index(repository, commit)
-            _update_working_directory(repository)
+        sys.exit()
+    repository.init_required_paths()
+    if not repository.has_commits():
+        click.echo("No commits yet")
+        sys.exit()
+    repository.init_head()
+    _replace_head(repository, commit)
+    _update_index(repository, commit)
+    _update_working_directory(repository)
 
 
 def _replace_head(repository, commit):
