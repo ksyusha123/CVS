@@ -23,4 +23,3 @@ class Repository:
 
     def init_head(self):
         self.head = Path(self.cvs / 'HEAD')
-
