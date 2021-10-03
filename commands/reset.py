@@ -1,5 +1,6 @@
 from pathlib import Path
 import click
+import zlib
 
 from Repository import Repository
 
@@ -56,5 +57,6 @@ def _update_working_directory(repository):
             file_data = indexed_file.split()
             type, hash, name = file_data[0], file_data[1], file_data[2]
             with open(Path(repository.path/name), 'w') as current_file:
-                with open(Path(repository.objects/hash)) as old_file:
-                    current_file.write(old_file.read())
+                with open(Path(repository.objects/hash), 'rb') as old_file:
+                    current_file.write(
+                        zlib.decompress(old_file.read()).decode())

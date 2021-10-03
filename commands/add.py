@@ -1,6 +1,8 @@
 import hashlib
 from pathlib import Path
 import click
+import zlib
+
 from Repository import Repository
 
 
@@ -28,9 +30,8 @@ def _calculate_hash(repository, file):
 def _create_blob(hash, repository, file):
     with open(Path(repository.objects/hash), 'wb') as obj, \
          open(Path(repository.path/file)) as f:
-        for line in f:
-            byte_string = f"{line}\n".encode()
-            obj.write(byte_string)
+        compressed_content = zlib.compress(f.read().encode())
+        obj.write(compressed_content)
 
 
 def _add_to_index(hash, repository, file):

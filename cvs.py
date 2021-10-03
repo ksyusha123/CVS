@@ -6,7 +6,7 @@ from commands import add
 from commands import commit
 
 
-@click.group(help="my text")
+@click.group(help="Control version system")
 def cvs():
     pass
 
