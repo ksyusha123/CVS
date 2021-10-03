@@ -27,14 +27,18 @@
 4.  pip install --editable .  
 
 ## Использование  
-Из консоли нужно вводить команды  
+Из консоли нужно вводить команды, начиная с cvs.   
  
 ###Примеры   
-- init  
-- add file.txt  
-- commit -m some_commit_text  
-- log  
-- creset 4660a5c5d6bc3ea19123157d8e4d582aea8d8637  
+- cvs init  
+- cvs add file.txt  
+- cvs commit -m some_commit_text  
+- cvs log  
+- cvs reset 4660a5c5d6bc3ea19123157d8e4d582aea8d8637  
+
+###Справка  
+cvs --help  
+cvs {command} --help  
 
 ##Подробности реализации  
 

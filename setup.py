@@ -11,11 +11,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'init = commands.init:init',
-            'add = commands.add:add',
-            'commit = commands.commit:commit',
-            'log = commands.log:log',
-            'reset = commands.reset:reset'
+            'cvs = cvs'
         ],
     },
 )
