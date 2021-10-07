@@ -17,8 +17,6 @@ def commit(message):
         click.echo("Init a repository first")
         sys.exit()
     repository.init_required_paths()
-    if repository.has_commits():
-        repository.init_head()
     repository_hash = dirhash(repository.path, 'sha1')
     _make_graph(repository.path, repository_hash, repository)
     commit_hash = _create_commit_object(
@@ -83,6 +81,8 @@ def _calculate_hash(file_path):
 
 def _direct_head(commit_hash, repository):
     if not repository.has_commits():
-        repository.init_head()
-    with open(repository.head, 'w') as head:
-        head.write(commit_hash)
+        repository.create_master()
+    with open(repository.head) as head:
+        current_branch = head.readline()
+        with open(Path(repository.cvs / current_branch), 'w') as current:
+            current.write(commit_hash)

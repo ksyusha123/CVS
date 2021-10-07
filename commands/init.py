@@ -1,4 +1,5 @@
 import sys
+from os.path import relpath
 from pathlib import Path
 import click
 
@@ -14,4 +15,6 @@ def init():
     repository.init_required_paths()
     with open(repository.index, 'w') as index:
         pass
+    with open(repository.head, 'w') as head:
+        head.write(relpath(repository.master, repository.cvs))
     click.echo("Repository has been created successfully")
