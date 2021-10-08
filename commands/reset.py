@@ -6,16 +6,16 @@ import zlib
 from repository import Repository
 
 
-@click.command(help='Replaces HEAD and current branch to given commit.')
+@click.command(help='Replaces HEAD and current branch to given commit')
 @click.option('--soft', 'option', is_flag=True, default=True,
               flag_value='soft',
-              help='Is default option.')
+              help='Is default option')
 @click.option('--hard', 'option', is_flag=True,
               flag_value='hard',
-              help='Updates index and working directory.')
+              help='Updates index and working directory')
 @click.option('--mixed', 'option', is_flag=True,
               flag_value='mixed',
-              help='Updates index.')
+              help='Updates index')
 @click.argument('commit', required=True)
 def reset(commit, option):
     repository = Repository(Path.cwd())

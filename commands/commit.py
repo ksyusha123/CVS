@@ -8,7 +8,7 @@ from checksumdir import dirhash
 from repository import Repository
 
 
-@click.command()
+@click.command(help="Commits changes")
 @click.option('-m', '--message', 'message',
               required=True, help='Commit message')
 def commit(message):

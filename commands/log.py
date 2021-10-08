@@ -5,7 +5,7 @@ import click
 from repository import Repository
 
 
-@click.command()
+@click.command(help="Shows commit history for current branch")
 def log():
     repository = Repository(Path.cwd())
     if not repository.is_initialised:

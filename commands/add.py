@@ -7,7 +7,7 @@ import zlib
 from repository import Repository
 
 
-@click.command()
+@click.command(help="Indexes the file")
 @click.argument('file')
 def add(file):
     repository = Repository(Path.cwd())

@@ -6,7 +6,7 @@ import click
 from repository import Repository
 
 
-@click.command()
+@click.command(help="Initialises a repository for current working directory")
 def init():
     repository = Repository(Path.cwd())
     if repository.is_initialised:
