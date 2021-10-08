@@ -15,17 +15,18 @@ def log():
     if not repository.has_commits():
         click.echo("No commits yet")
         sys.exit()
-    repository.init_head()
     with open(repository.head) as head:
-        commit = head.readline()
-        _print_commits_tree(commit, repository)
+        current_branch = head.readline()
+        with open(Path(repository.cvs / current_branch)) as current:
+            commit = current.readline()
+            _print_commits_tree(commit, repository)
 
 
 def _print_commits_tree(commit, repository):
     while True:
         with open(Path(repository.objects / commit)) as commit_obj:
             lines = commit_obj.readlines()
-            print(f"{commit} {lines[-1]}")
+            click.echo(f"{commit} {lines[-1]}")
             if len(lines) == 4:
                 commit = lines[1].split()[1]
             else:

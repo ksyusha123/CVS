@@ -21,7 +21,7 @@ def commit(message):
     _make_graph(repository.path, repository_hash, repository)
     commit_hash = _create_commit_object(
         repository_hash, repository, message)
-    _direct_head(commit_hash, repository)
+    _direct_current_branch(commit_hash, repository)
 
 
 def _make_graph(current_directory, current_dir_hash, repository):
@@ -67,9 +67,11 @@ def _find_parent_commit(repository):
     parent = None
     if repository.has_commits():
         with open(repository.head) as head:
-            current_commit = head.readline()
-            if current_commit != "":
-                parent = current_commit
+            current_branch = head.readline()
+            with open(repository.cvs / current_branch) as current:
+                current_commit = current.readline()
+                if current_commit != "":
+                    parent = current_commit
     return parent
 
 
@@ -79,7 +81,7 @@ def _calculate_hash(file_path):
     return hash
 
 
-def _direct_head(commit_hash, repository):
+def _direct_current_branch(commit_hash, repository):
     if not repository.has_commits():
         repository.create_master()
     with open(repository.head) as head:

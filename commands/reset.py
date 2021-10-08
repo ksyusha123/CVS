@@ -6,9 +6,18 @@ import zlib
 from repository import Repository
 
 
-@click.command()
+@click.command(help='Replaces HEAD and current branch to given commit.')
+@click.option('--soft', 'option', is_flag=True, default=True,
+              flag_value='soft',
+              help='Is default option.')
+@click.option('--hard', 'option', is_flag=True,
+              flag_value='hard',
+              help='Updates index and working directory.')
+@click.option('--mixed', 'option', is_flag=True,
+              flag_value='mixed',
+              help='Updates index.')
 @click.argument('commit', required=True)
-def reset(commit):
+def reset(commit, option):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
@@ -17,19 +26,22 @@ def reset(commit):
     if not repository.has_commits():
         click.echo("No commits yet")
         sys.exit()
-    repository.init_head()
-    _replace_head(repository, commit)
-    _update_index(repository, commit)
-    _update_working_directory(repository)
+    _replace_current_branch(repository, commit)
+    if option == 'mixed' or option == 'hard':
+        _update_index(repository, commit)
+        if option == 'hard':
+            _update_working_directory(repository)
 
 
-def _replace_head(repository, commit):
+def _replace_current_branch(repository, commit):
     with open(repository.head) as head:
-        previous_commit = head.readline()
-    with open(repository.head, 'w') as head:
-        with open(Path(repository.cvs/'ORIG_HEAD'), 'w') as orig_head:
-            orig_head.write(previous_commit)
-            head.write(commit)
+        current_branch = head.readline()
+        with open(Path(repository.cvs / current_branch)) as current:
+            previous_commit = current.readline()
+            with open(Path(repository.cvs / 'ORIG_HEAD'), 'w') as orig_head:
+                orig_head.write(previous_commit)
+        with open(Path(repository.cvs / current_branch), 'w') as current:
+            current.write(commit)
 
 
 def _update_index(repository, commit):

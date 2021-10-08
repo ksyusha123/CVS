@@ -14,6 +14,9 @@ def add(file):
     if not repository.is_initialised:
         click.echo("Init a repository first")
         sys.exit()
+    if not Path(repository.path / file).exists():
+        click.echo("File Not Found")
+        sys.exit()
     repository.init_required_paths()
     hash = _calculate_hash(repository, file)
     _create_blob(hash, repository, file)
