@@ -28,9 +28,9 @@ def reset(commit, option):
         sys.exit()
     _replace_current_branch(repository, commit)
     if option == 'mixed' or option == 'hard':
-        _update_index(repository, commit)
+        update_index(repository, commit)
         if option == 'hard':
-            _update_working_directory(repository)
+            update_working_directory(repository)
 
 
 def _replace_current_branch(repository, commit):
@@ -44,7 +44,7 @@ def _replace_current_branch(repository, commit):
             current.write(commit)
 
 
-def _update_index(repository, commit):
+def update_index(repository, commit):
     old_commit_index = []
     with open(Path(repository.objects / commit)) as commit_obj:
         _get_files(
@@ -64,7 +64,7 @@ def _get_files(tree, old_commit_index, repository):
                 _get_files(hash, old_commit_index, repository)
 
 
-def _update_working_directory(repository):
+def update_working_directory(repository):
     with open(repository.index) as index:
         for indexed_file in index:
             file_data = indexed_file.split()

@@ -11,6 +11,7 @@ class Repository:
         self.master = Path()
         self.refs = Path()
         self.heads = Path()
+        self.branches = set()
 
     @property
     def is_initialised(self):
@@ -31,6 +32,8 @@ class Repository:
         Path(self.objects).mkdir(parents=True, exist_ok=True)
         Path(self.refs).mkdir(parents=True, exist_ok=True)
         Path(self.heads).mkdir(parents=True, exist_ok=True)
+        for branch in self.heads.iterdir():
+            self.branches.add(branch.name)
 
     def create_master(self):
         with open(self.master, 'w') as master:

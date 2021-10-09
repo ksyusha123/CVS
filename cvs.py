@@ -5,6 +5,7 @@ from commands import init
 from commands import add
 from commands import commit
 from commands import branch
+from commands import checkout
 
 
 @click.group(help="Control version system")
@@ -18,3 +19,4 @@ cvs.add_command(add.add)
 cvs.add_command(commit.commit)
 cvs.add_command(reset.reset)
 cvs.add_command(branch.branch)
+cvs.add_command(checkout.checkout)
