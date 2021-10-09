@@ -17,6 +17,10 @@ def branch(name):
         for branch_name in repository.branches:
             click.echo(branch_name)
         sys.exit()
+    create_branch(repository, name)
+
+
+def create_branch(repository, name):
     with open(Path(repository.heads / name), 'w') as new_branch:
         with open(repository.head) as head:
             with open(repository.cvs / head.readline()) as current_branch:
