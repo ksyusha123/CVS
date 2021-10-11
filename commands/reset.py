@@ -57,9 +57,9 @@ def _get_files(tree, old_commit_index, repository):
     with open(Path(repository.objects / tree)) as tree_file:
         for line in tree_file:
             obj_data = line.split()
-            obj_type, hash = obj_data[0], obj_data[1]
+            obj_type, hash, name = obj_data[0], obj_data[1], obj_data[2]
             if obj_type == 'blob':
-                old_commit_index.append(line)
+                old_commit_index.append(f"{name} {hash}\n")
             else:
                 _get_files(hash, old_commit_index, repository)
 
@@ -68,7 +68,7 @@ def update_working_directory(repository):
     with open(repository.index) as index:
         for indexed_file in index:
             file_data = indexed_file.split()
-            type, hash, name = file_data[0], file_data[1], file_data[2]
+            name, hash = file_data[0], file_data[1]
             with open(Path(repository.path/name), 'w') as current_file:
                 with open(Path(repository.objects/hash), 'rb') as old_file:
                     current_file.write(
