@@ -4,6 +4,8 @@ from pathlib import Path
 import click
 import zlib
 from os.path import relpath
+from os.path import getsize
+
 
 from repository import Repository
 
@@ -44,18 +46,28 @@ def _add_file(repository, file):
 
 
 def _calculate_hash(repository, file):
-    with open(Path(repository.path/file)) as f:
-        content = f.read()
-        string_to_hash = f"blob {len(content)}\\0{content}"
+    content_size = getsize(file)
+    string_to_hash = f"blob {content_size}\\0"
+    with open(Path(repository.path/file), 'rb') as f:
+        while True:
+            content = f.read(32768)
+            if not content:
+                break
+            string_to_hash += str(content)
         hash = hashlib.sha1(string_to_hash.encode()).hexdigest()
     return hash
 
 
 def _create_blob(hash, repository, file):
     with open(Path(repository.objects/hash), 'wb') as obj, \
-         open(Path(repository.path/file)) as f:
-        compressed_content = zlib.compress(f.read().encode())
-        obj.write(compressed_content)
+         open(Path(repository.path/file), 'rb') as f:
+        compressed_content = b''
+        while True:
+            content = f.read(32768)
+            if not content:
+                break
+            compressed_content += zlib.compress(content)
+            obj.write(compressed_content)
 
 
 def _add_to_index(hash, repository, file):
