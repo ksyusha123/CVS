@@ -61,13 +61,16 @@ def _calculate_hash(repository, file):
 def _create_blob(hash, repository, file):
     with open(Path(repository.objects/hash), 'wb') as obj, \
          open(Path(repository.path/file), 'rb') as f:
-        compressed_content = b''
-        while True:
-            content = f.read(32768)
-            if not content:
-                break
-            compressed_content += zlib.compress(content)
-            obj.write(compressed_content)
+        compress_obj = zlib.compressobj()
+        obj.write(compress_obj.compress(f.read()))
+
+        # compressed_content = b''
+        # while True:
+        #     content = f.read(32768)
+        #     if not content:
+        #         break
+        #     compressed_content += zlib.compress(content)
+        #     obj.write(compressed_content)
 
 
 def _add_to_index(hash, repository, file):
