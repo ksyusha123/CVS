@@ -5,6 +5,7 @@ import click
 import zlib
 from os.path import relpath
 from os.path import getsize
+from multiprocessing import Pool, current_process
 
 
 from repository import Repository
@@ -32,7 +33,10 @@ def _add(repository, obj_name):
 
 
 def _add_directory(repository, directory):
+    if directory.name == '.cvs':
+        return
     for obj in directory.iterdir():
+        click.echo(str(obj))
         if obj.is_file():
             _add_file(repository, relpath(obj, repository.path))
         else:
@@ -52,7 +56,7 @@ def _calculate_hash(repository, file):
     string_to_hash = f"blob {content_size}\\0"
     with open(Path(repository.path/file), 'rb') as f:
         while True:
-            content = f.read(32768)
+            content = f.read(10240000)
             if not content:
                 break
             string_to_hash += str(content)
@@ -61,12 +65,36 @@ def _calculate_hash(repository, file):
 
 
 def _create_blob(hash, repository, file):
-    with open(Path(repository.objects/hash), 'wb') as obj, \
-         open(Path(repository.path/file), 'rb') as f:
-        compress_obj = zlib.compressobj()
-        compressed_content = compress_obj.compress(f.read())
-        click.echo(len(compressed_content))
+    with open(Path(repository.objects/hash), 'wb') as obj:
+        compressed_content = _compress_file(repository, file)
         obj.write(compressed_content)
+
+
+def _compress_file(repository, file):
+    file_parts = _split_file(repository, file)
+    click.echo('file parts')
+    with Pool() as pool:
+        compressed_file_parts = pool.map(_compress_content, file_parts)
+    return b'--new-part--'.join(compressed_file_parts)
+
+
+def _compress_content(content):
+    click.echo(current_process().name)
+    compress_obj = zlib.compressobj()
+    compressed_content = compress_obj.compress(content)
+    return compressed_content
+
+
+def _split_file(repository, file):
+    parts = []
+    with open(Path(repository.path / file), 'rb') as f:
+        while True:
+            click.echo('reading')
+            content = f.read(10240000) # 10000 Kb
+            if not content:
+                break
+            parts.append(content)
+    return parts
 
 
 def _add_to_index(hash, repository, file):

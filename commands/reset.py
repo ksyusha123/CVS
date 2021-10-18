@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 import click
 import zlib
+from multiprocessing import Pool
 
 from repository import Repository
 
@@ -69,8 +70,32 @@ def update_working_directory(repository):
         for indexed_file in index:
             file_data = indexed_file.split()
             name, hash = file_data[0], file_data[1]
-            with open(Path(repository.objects/hash), 'rb') as old_file:
-                current_file = Path(repository.path / name)
-                decompress_obj = zlib.decompressobj()
-                current_file.write_bytes(
-                    decompress_obj.decompress(old_file.read()))
+            old_file = Path(repository.objects / hash)
+            # with open(Path(repository.objects/hash), 'rb') as old_file:
+            current_file = Path(repository.path / name)
+                # decompress_obj = zlib.decompressobj()
+                # current_file.write_bytes(
+                #     decompress_obj.decompress(old_file.read()))
+            current_file.write_bytes(_decompress_file(repository, old_file))
+
+
+def _decompress_file(repository, file):
+    file_parts = _split_bytes_file(repository, file)
+    with Pool() as pool:
+        decompressed_file_parts = pool.map(_decompress_content, file_parts)
+    return b''.join(decompressed_file_parts)
+
+
+def _decompress_content(content):
+    decompress_obj = zlib.decompressobj()
+    decompressed_content = decompress_obj.decompress(content)
+    return decompressed_content
+
+
+def _split_bytes_file(repository, file):
+    parts = []
+    with open(Path(repository.path / file), 'rb') as f:
+        content = f.read()
+        split_content = content.split(b'--new-part--')
+        parts += split_content
+    return parts
