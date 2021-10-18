@@ -5,7 +5,7 @@ import click
 import zlib
 from os.path import relpath
 from os.path import getsize
-from multiprocessing import Pool, current_process
+from multiprocessing import Pool
 
 
 from repository import Repository
@@ -54,13 +54,14 @@ def _add_file(repository, file):
 def _calculate_hash(repository, file):
     content_size = getsize(file)
     string_to_hash = f"blob {content_size}\\0"
+    sha1 = hashlib.sha1(string_to_hash.encode())
     with open(Path(repository.path/file), 'rb') as f:
         while True:
-            content = f.read(10240000)
+            content = f.read()
             if not content:
                 break
-            string_to_hash += str(content)
-        hash = hashlib.sha1(string_to_hash.encode()).hexdigest()
+            sha1.update(content)
+        hash = sha1.hexdigest()
     return hash
 
 
@@ -79,7 +80,6 @@ def _compress_file(repository, file):
 
 
 def _compress_content(content):
-    click.echo(current_process().name)
     compress_obj = zlib.compressobj()
     compressed_content = compress_obj.compress(content)
     return compressed_content
