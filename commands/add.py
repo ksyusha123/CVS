@@ -6,6 +6,7 @@ import zlib
 from os.path import relpath
 from os.path import getsize
 from multiprocessing import Pool
+from time import perf_counter
 
 
 from repository import Repository
@@ -45,7 +46,6 @@ def _add_directory(repository, directory):
 
 def _add_file(repository, file):
     hash = _calculate_hash(repository, file)
-    click.echo(hash)
     if not Path(repository.objects / hash).exists():
         _create_blob(hash, repository, file)
     _add_to_index(hash, repository, file)
@@ -72,15 +72,16 @@ def _create_blob(hash, repository, file):
 
 
 def _compress_file(repository, file):
+    start = perf_counter()
     file_parts = _split_file(repository, file)
-    click.echo('file parts')
     with Pool() as pool:
         compressed_file_parts = pool.map(_compress_content, file_parts)
+    click.echo(perf_counter() - start)
     return b'--new-part--'.join(compressed_file_parts)
 
 
 def _compress_content(content):
-    compress_obj = zlib.compressobj()
+    compress_obj = zlib.compressobj(level=9)
     compressed_content = compress_obj.compress(content)
     return compressed_content
 
@@ -89,8 +90,7 @@ def _split_file(repository, file):
     parts = []
     with open(Path(repository.path / file), 'rb') as f:
         while True:
-            click.echo('reading')
-            content = f.read(10240000) # 10000 Kb
+            content = f.read(1048576)
             if not content:
                 break
             parts.append(content)
