@@ -6,7 +6,6 @@ import zlib
 from os.path import relpath
 from os.path import getsize
 from multiprocessing import Pool
-from time import perf_counter
 
 
 from repository import Repository
@@ -72,11 +71,9 @@ def _create_blob(hash, repository, file):
 
 
 def _compress_file(repository, file):
-    start = perf_counter()
     file_parts = _split_file(repository, file)
     with Pool() as pool:
         compressed_file_parts = pool.map(_compress_content, file_parts)
-    click.echo(perf_counter() - start)
     return b'--new-part--'.join(compressed_file_parts)
 
 
