@@ -71,11 +71,7 @@ def update_working_directory(repository):
             file_data = indexed_file.split()
             name, hash = file_data[0], file_data[1]
             old_file = Path(repository.objects / hash)
-            # with open(Path(repository.objects/hash), 'rb') as old_file:
             current_file = Path(repository.path / name)
-                # decompress_obj = zlib.decompressobj()
-                # current_file.write_bytes(
-                #     decompress_obj.decompress(old_file.read()))
             current_file.write_bytes(_decompress_file(repository, old_file))
 
 
