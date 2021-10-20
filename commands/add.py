@@ -7,7 +7,6 @@ from os.path import relpath
 from os.path import getsize
 from multiprocessing import Pool
 
-
 from repository import Repository
 
 

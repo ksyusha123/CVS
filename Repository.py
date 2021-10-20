@@ -11,6 +11,7 @@ class Repository:
         self.master = Path()
         self.refs = Path()
         self.heads = Path()
+        self.tags = Path()
         self.branches = set()
 
     @property
@@ -26,12 +27,14 @@ class Repository:
         self.index = Path(self.cvs / 'index')
         self.head = Path(self.cvs / 'HEAD')
         self.refs = Path(self.cvs / 'refs')
+        self.tags = Path(self.refs / 'tags')
         self.heads = Path(self.refs / 'heads')
         self.master = Path(self.heads / 'master')
         Path(self.cvs).mkdir(parents=True, exist_ok=True)
         Path(self.objects).mkdir(parents=True, exist_ok=True)
         Path(self.refs).mkdir(parents=True, exist_ok=True)
         Path(self.heads).mkdir(parents=True, exist_ok=True)
+        Path(self.tags).mkdir(parents=True, exist_ok=True)
         for branch in self.heads.iterdir():
             self.branches.add(branch.name)
 
