@@ -36,5 +36,4 @@ class Repository:
             self.branches.add(branch.name)
 
     def create_master(self):
-        with open(self.master, 'w') as master:
-            pass
+        self.master.touch()
