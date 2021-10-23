@@ -21,8 +21,8 @@ def tag(name, commit):
 
 
 def _print_all_tags(repository):
-    for tag_name in repository.tags.iterdir():
-        click.echo(tag_name.name)
+    for tag_name in repository.all_tags:
+        click.echo(tag_name)
 
 
 def _create_tag(repository, name, commit):

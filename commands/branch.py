@@ -28,7 +28,7 @@ def create_branch(repository, name):
 
 
 def _print_all_branches(repository):
-    current_branch = _get_current_branch(repository)
+    current_branch = get_current_position(repository).split('\\')[-1]
     for branch_name in repository.branches:
         if branch_name == current_branch:
             click.echo(f"->{current_branch}")
@@ -36,7 +36,7 @@ def _print_all_branches(repository):
             click.echo(f"  {branch_name}")
 
 
-def _get_current_branch(repository):
+def get_current_position(repository):
     with open(repository.head) as head:
-        current_branch = head.readline().split('\\')[-1]
+        current_branch = head.readline()
     return current_branch

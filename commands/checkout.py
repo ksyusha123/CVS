@@ -28,11 +28,31 @@ def checkout(position, branch_name):
         position = relpath(Path(repository.heads / position), repository.cvs)
         with open(repository.cvs / position) as current_branch:
             commit = current_branch.readline()
+    elif position in repository.all_tags:
+        position = relpath(Path(repository.tags / position), repository.cvs)
+        with open(repository.cvs / position) as current_tag:
+            commit = current_tag.readline()
     _replace_head(repository, position)
     update_index(repository, commit)
     update_working_directory(repository)
 
 
 def _replace_head(repository, position):
+    if _is_branch(repository, position) or _is_tag(repository, position):
+        position = relpath(Path(position), repository.cvs)
     with open(repository.head, 'w') as head:
         head.write(position)
+
+
+def _is_branch(repository, position):
+    branches = [branch.name for branch in repository.heads.iterdir()]
+    if position in branches:
+        return True
+    return False
+
+
+def _is_tag(repository, position):
+    tags = [tag.name for tag in repository.tags.iterdir()]
+    if position in tags:
+        return True
+    return False
