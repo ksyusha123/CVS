@@ -91,7 +91,7 @@ def _is_untracked(repository, file):
 def _get_files_ready_for_commit(repository):
     files_ready_for_commit = []
     indexed_files_info = _get_indexed_files_info(repository)
-    tree = _get_commit_tree(repository, _get_current_commit(repository))
+    tree = _get_commit_tree(repository, get_current_commit(repository))
     files_from_commit = _get_info_from_commit_tree(repository, tree)
     for indexed_file_info in indexed_files_info:
         if indexed_file_info in files_from_commit:
@@ -141,7 +141,7 @@ def _get_blobs(repository, tree):
     return blobs
 
 
-def _get_current_commit(repository):
+def get_current_commit(repository):
     with open(repository.head) as head:
         position = head.readline()
         position_type = _get_type_of_position(position)

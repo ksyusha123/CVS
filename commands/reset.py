@@ -5,6 +5,7 @@ import zlib
 from multiprocessing import Pool
 
 from repository import Repository
+from commands.status import get_current_commit
 
 
 @click.command(help='Replaces HEAD and current branch to given commit')
@@ -27,14 +28,15 @@ def reset(commit, option):
     if not repository.has_commits():
         click.echo("No commits yet")
         sys.exit()
-    _replace_current_branch(repository, commit)
+    commit = _get_commit_hash(repository, commit)
+    replace_current_branch(repository, commit)
     if option == 'mixed' or option == 'hard':
         update_index(repository, commit)
         if option == 'hard':
             update_working_directory(repository)
 
 
-def _replace_current_branch(repository, commit):
+def replace_current_branch(repository, commit):
     with open(repository.head) as head:
         current_branch = head.readline()
         with open(Path(repository.cvs / current_branch)) as current:
@@ -95,3 +97,22 @@ def _split_bytes_file(repository, file):
         split_content = content.split(b'--new-part--')
         parts += split_content
     return parts
+
+
+def _get_commit_hash(repository, commit):
+    if '~' in commit:
+        commit = get_commit_from_end(repository, int(commit.split('~')[1]))
+    return commit
+
+
+def get_commit_from_end(repository, number):
+    current_commit = get_current_commit(repository)
+    for i in range(number):
+        with open(Path(repository.objects / current_commit)) as commit:
+            lines = commit.readlines()
+            if len(lines) < 4:
+                click.echo("There is no such commit")
+                sys.exit()
+            current_commit = lines[1].split()[1]
+    return current_commit
+

@@ -8,6 +8,7 @@ from commands import branch
 from commands import checkout
 from commands import tag
 from commands import status
+from commands import squash
 
 
 @click.group(help="Control version system")
@@ -24,3 +25,4 @@ cvs.add_command(branch.branch)
 cvs.add_command(checkout.checkout)
 cvs.add_command(tag.tag)
 cvs.add_command(status.status)
+cvs.add_command(squash.squash)

@@ -12,6 +12,10 @@ from repository import Repository
 @click.option('-m', '--message', 'message',
               required=True, help='Commit message')
 def commit(message):
+    commit_command(message)
+
+
+def commit_command(message):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
