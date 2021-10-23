@@ -12,11 +12,24 @@ class Repository:
         self.refs = Path()
         self.heads = Path()
         self.tags = Path()
-        self.branches = set()
 
     @property
     def is_initialised(self):
         return Path(self.path / '.cvs').exists()
+
+    @property
+    def branches(self):
+        branches = set()
+        for branch in self.heads.iterdir():
+            branches.add(branch.name)
+        return branches
+
+    @property
+    def all_tags(self):
+        tags = set()
+        for tag in self.tags.iterdir():
+            tags.add(tag.name)
+        return tags
 
     def has_commits(self):
         return Path(self.master).exists()
@@ -35,8 +48,6 @@ class Repository:
         Path(self.refs).mkdir(parents=True, exist_ok=True)
         Path(self.heads).mkdir(parents=True, exist_ok=True)
         Path(self.tags).mkdir(parents=True, exist_ok=True)
-        for branch in self.heads.iterdir():
-            self.branches.add(branch.name)
 
     def create_master(self):
         self.master.touch()

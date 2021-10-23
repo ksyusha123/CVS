@@ -7,6 +7,7 @@ from commands import commit
 from commands import branch
 from commands import checkout
 from commands import tag
+from commands import status
 
 
 @click.group(help="Control version system")
@@ -22,3 +23,4 @@ cvs.add_command(reset.reset)
 cvs.add_command(branch.branch)
 cvs.add_command(checkout.checkout)
 cvs.add_command(tag.tag)
+cvs.add_command(status.status)
