@@ -43,13 +43,13 @@ def _add_directory(repository, directory):
 
 
 def _add_file(repository, file):
-    hash = _calculate_hash(repository, file)
+    hash = calculate_hash(repository, file)
     if not Path(repository.objects / hash).exists():
         _create_blob(hash, repository, file)
     _add_to_index(hash, repository, file)
 
 
-def _calculate_hash(repository, file):
+def calculate_hash(repository, file):
     content_size = getsize(file)
     string_to_hash = f"blob {content_size}\\0"
     sha1 = hashlib.sha1(string_to_hash.encode())

@@ -7,6 +7,7 @@ from enum import Enum
 
 from repository import Repository
 from commands.branch import get_current_position
+from commands.add import calculate_hash
 
 
 @click.command(help="Prints information about files in repository")
@@ -21,13 +22,15 @@ def status():
     click.echo()
     _print_current_position(repository)
     _print_untracked_files(repository)
+    _print_files_ready_for_commit(repository)
+    _print_modified_files(repository)
 
 
 def _print_current_position(repository):
     current_position = get_current_position(repository)
     position_type = _get_type_of_position(current_position)
     if (position_type == PositionType.branch or
-        position_type == PositionType.tag):
+            position_type == PositionType.tag):
         position_name = current_position.split('\\')[-1]
         click.echo(f"On {position_type.name} {position_name}\n")
     else:
@@ -44,23 +47,30 @@ def _print_untracked_files(repository):
             click.echo(f"\t{file}")
 
 
+def _print_files_ready_for_commit(repository):
+    files_ready_for_commit = _get_files_ready_for_commit(repository)
+    if len(files_ready_for_commit) == 0:
+        click.echo("Nothing to commit")
+    else:
+        click.echo("Files ready for commit:")
+        for file in files_ready_for_commit:
+            click.echo(f"\t{file}")
+
+
+def _print_modified_files(repository):
+    modified_files = _get_modified_files(repository)
+    if len(modified_files) == 0:
+        click.echo("Working tree clean")
+    else:
+        click.echo("Files not staged for commit")
+        for file in modified_files:
+            click.echo(f"\t{file}")
+
+
 def _get_untracked_files(repository):
     untracked_files = _bfs(repository.path, _get_subdirectories, _get_files,
                            _is_untracked, repository)
     return untracked_files
-    # untracked_files = set()
-    # queue = deque()
-    # queue.append(repository.path)
-    # while len(queue) != 0:
-    #     current_directory = queue.popleft()
-    #     subdirectories, files = \
-    #         _get_subdirectories_and_files(repository, current_directory)
-    #     for file in files:
-    #         if _is_untracked(repository, file):
-    #             untracked_files.add(file)
-    #     for subdirectory in subdirectories:
-    #         queue.append(subdirectory)
-    # return untracked_files
 
 
 def _get_subdirectories(repository, directory):
@@ -81,23 +91,29 @@ def _get_files(repository, directory):
 
 
 def _is_untracked(repository, file):
-    is_untracked = True
-    indexed_files = _get_indexed_files(repository)
-    if file in indexed_files:
-        is_untracked = False
-    return is_untracked
+    indexed_files = _get_indexed_files_info(repository)
+    return file not in indexed_files
 
 
-# def _get_files_ready_for_commit(repository):
-#     indexed_files = _get_indexed_files(repository)
-#     for file in indexed_files:
+def _get_files_ready_for_commit(repository):
+    files_ready_for_commit = []
+    indexed_files_info = _get_indexed_files_info(repository)
+    tree = _get_commit_tree(repository, _get_current_commit(repository))
+    files_from_commit = _get_info_from_commit_tree(repository, tree)
+    for indexed_file_info in indexed_files_info:
+        if indexed_file_info in files_from_commit:
+            if (indexed_files_info[indexed_file_info] !=
+                    files_from_commit[indexed_file_info]):
+                files_ready_for_commit.append(indexed_file_info)
+        else:
+            files_ready_for_commit.append(indexed_file_info)
+    return files_ready_for_commit
 
 
-
-def _get_indexed_files(repository):
+def _get_indexed_files_info(repository):
     with open(repository.index) as index:
-        indexed_files = [line.split()[0] for line in index]
-    return indexed_files
+        indexed_files_info = [tuple(line.split()) for line in index]
+    return dict(indexed_files_info)
 
 
 def _get_commit_tree(repository, commit):
@@ -107,16 +123,16 @@ def _get_commit_tree(repository, commit):
 
 
 def _get_info_from_commit_tree(repository, tree):
-    files_from_commit = _bfs(tree, _get_subtrees, _get_blobs, lambda x: True,
-                             repository)
-    return files_from_commit
+    files_from_commit = _bfs(tree, _get_subtrees, _get_blobs,
+                             lambda *args: True, repository)
+    return dict(files_from_commit)
 
 
 def _get_subtrees(repository, tree):
     subtrees = set()
     with open(Path(repository.objects / tree)) as tree_obj:
         for line in tree_obj:
-            filetype, hash = line.split()
+            filetype, hash, name = line.split()
             if filetype == 'tree':
                 subtrees.add(hash)
     return subtrees
@@ -126,9 +142,9 @@ def _get_blobs(repository, tree):
     blobs = set()
     with open(Path(repository.objects / tree)) as tree_obj:
         for line in tree_obj:
-            filetype, hash = line.split()
+            filetype, hash, name = line.split()
             if filetype == 'blob':
-                blobs.add(hash)
+                blobs.add((name, hash))
     return blobs
 
 
@@ -154,6 +170,23 @@ def _get_type_of_position(position):
         return PositionType.commit
 
 
+def _get_modified_files(repository):
+    modified_files = []
+    working_directory_tracked_files = _bfs(repository.path,
+                                           _get_subdirectories, _get_files,
+                                           _is_tracked, repository)
+    indexed_files_info = _get_indexed_files_info(repository)
+    for file in working_directory_tracked_files:
+        hash = calculate_hash(repository, file)
+        if hash != indexed_files_info[file]:
+            modified_files.append(file)
+    return modified_files
+
+
+def _is_tracked(repository, file):
+    return not _is_untracked(repository, file)
+
+
 def _bfs(root, get_children, get_values, must_be_in_answer, *args):
     answer = set()
     queue = deque()
@@ -174,3 +207,5 @@ class PositionType(Enum):
     branch = 0,
     tag = 1,
     commit = 2
+
+# status()
