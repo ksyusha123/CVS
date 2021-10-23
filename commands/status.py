@@ -13,8 +13,6 @@ from commands.add import calculate_hash
 @click.command(help="Prints information about files in repository")
 def status():
     repository = Repository(Path.cwd())
-    # repository = Repository(Path("C:\\Users\\Пользователь\\OneDrive\\Рабочий "
-    #                              "стол\\домашки\\CVS\\test"))
     if not repository.is_initialised:
         click.echo("Init a repository first")
         sys.exit()
@@ -38,32 +36,27 @@ def _print_current_position(repository):
 
 
 def _print_untracked_files(repository):
-    untracked_files = _get_untracked_files(repository)
-    if len(untracked_files) == 0:
-        click.echo("Nothing added to commit")
-    else:
-        click.echo("Untracked files:")
-        for file in untracked_files:
-            click.echo(f"\t{file}")
+    _print_files(repository, _get_untracked_files, "Nothing added to commit",
+                 "Untracked files:")
 
 
 def _print_files_ready_for_commit(repository):
-    files_ready_for_commit = _get_files_ready_for_commit(repository)
-    if len(files_ready_for_commit) == 0:
-        click.echo("Nothing to commit")
-    else:
-        click.echo("Files ready for commit:")
-        for file in files_ready_for_commit:
-            click.echo(f"\t{file}")
+    _print_files(repository, _get_files_ready_for_commit, "Nothing to commit",
+                 "Files ready for commit:")
 
 
 def _print_modified_files(repository):
-    modified_files = _get_modified_files(repository)
-    if len(modified_files) == 0:
-        click.echo("Working tree clean")
+    _print_files(repository, _get_modified_files, "Working tree clean",
+                 "Files not staged for commit:")
+
+
+def _print_files(repository, get_files, message_if_no_files, message):
+    files = get_files(repository)
+    if len(files) == 0:
+        click.echo(message_if_no_files)
     else:
-        click.echo("Files not staged for commit")
-        for file in modified_files:
+        click.echo(message)
+        for file in files:
             click.echo(f"\t{file}")
 
 
@@ -207,5 +200,3 @@ class PositionType(Enum):
     branch = 0,
     tag = 1,
     commit = 2
-
-# status()
