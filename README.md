@@ -19,6 +19,9 @@
 	- init.py  
 	- log.py  
 	- reset.py  
+	- squash.py  
+	- status.py  
+	- tag.py  
 - класс, описывающий репозиторий: repository.py  
 - файл, с помощью которого из консоли можно вызывать модули: setup.py  
 
