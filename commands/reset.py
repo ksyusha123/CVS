@@ -20,6 +20,10 @@ from commands.status import get_current_commit
               help='Updates index')
 @click.argument('commit', required=True)
 def reset(commit, option):
+    reset_command(commit, option)
+
+
+def reset_command(commit, option):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")

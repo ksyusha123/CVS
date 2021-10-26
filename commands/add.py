@@ -13,13 +13,17 @@ from repository import Repository
 @click.command(help="Indexes files")
 @click.argument('obj_name')
 def add(obj_name):
+    add_command(obj_name)
+
+
+def add_command(obj_name):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
         sys.exit()
     if not Path(repository.path / obj_name).exists():
-        click.echo("File Not Found")
-        sys.exit()
+        click.echo("File not found. Check path name")
+        return
     repository.init_required_paths()
     _add(repository, obj_name)
 
@@ -35,7 +39,6 @@ def _add_directory(repository, directory):
     if directory.name == '.cvs':
         return
     for obj in directory.iterdir():
-        click.echo(str(obj))
         if obj.is_file():
             _add_file(repository, relpath(obj, repository.path))
         else:

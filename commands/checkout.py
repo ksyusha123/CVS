@@ -13,6 +13,10 @@ from commands.branch import create_branch
 @click.option('-b', '--branch', 'branch_name', required=False,
               help="Creates new branch with given name")
 def checkout(position, branch_name):
+    checkout_command(position, branch_name)
+
+
+def checkout_command(position, branch_name):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")

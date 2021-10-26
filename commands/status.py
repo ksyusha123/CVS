@@ -12,6 +12,10 @@ from commands.add import calculate_hash
 
 @click.command(help="Prints information about files in repository")
 def status():
+    status_command()
+
+
+def status_command():
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")

@@ -9,6 +9,10 @@ from repository import Repository
 @click.argument('name', required=False)
 @click.argument('commit', required=False)
 def tag(name, commit):
+    tag_command(name, commit)
+
+
+def tag_command(name, commit):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")

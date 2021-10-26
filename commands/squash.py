@@ -12,6 +12,10 @@ from commands.status import get_current_commit
 @click.command(help="Combines commits")
 @click.argument('commits_number', type=int)
 def squash(commits_number):
+    squash_command(commits_number)
+
+
+def squash_command(commits_number):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")

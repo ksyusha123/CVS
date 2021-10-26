@@ -8,6 +8,10 @@ from repository import Repository
 @click.command(help="Creates new branch")
 @click.argument('name', required=False)
 def branch(name):
+    branch_command(name)
+
+
+def branch_command(name):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
