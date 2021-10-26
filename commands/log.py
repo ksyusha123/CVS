@@ -14,11 +14,11 @@ def log_command():
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-        sys.exit()
+        return
     repository.init_required_paths()
     if not repository.has_commits():
         click.echo("No commits yet")
-        sys.exit()
+        return
     with open(repository.head) as head:
         current_branch = head.readline()
         with open(Path(repository.cvs / current_branch)) as current:

@@ -5,7 +5,6 @@ import zlib
 from multiprocessing import Pool
 
 from repository import Repository
-from commands.status import get_current_commit
 
 
 @click.command(help='Replaces HEAD and current branch to given commit')
@@ -27,11 +26,11 @@ def reset_command(commit, option):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-        sys.exit()
+        return
     repository.init_required_paths()
     if not repository.has_commits():
         click.echo("No commits yet")
-        sys.exit()
+        return
     commit = _get_commit_hash(repository, commit)
     replace_current_branch(repository, commit)
     if option == 'mixed' or option == 'hard':
@@ -110,7 +109,7 @@ def _get_commit_hash(repository, commit):
 
 
 def get_commit_from_end(repository, number):
-    current_commit = get_current_commit(repository)
+    current_commit = repository.current_commit
     for i in range(number):
         with open(Path(repository.objects / current_commit)) as commit:
             lines = commit.readlines()

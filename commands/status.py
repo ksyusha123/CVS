@@ -3,10 +3,8 @@ import sys
 from os.path import relpath
 from pathlib import Path
 from collections import deque
-from enum import Enum
 
 from repository import Repository
-from commands.branch import get_current_position
 from commands.add import calculate_hash
 
 
@@ -19,7 +17,7 @@ def status_command():
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-        sys.exit()
+        return
     repository.init_required_paths()
     click.echo()
     _print_current_position(repository)
@@ -29,18 +27,12 @@ def status_command():
 
 
 def _print_current_position(repository):
-    current_position = get_current_position(repository)
-    position_type = _get_type_of_position(current_position)
-    if (position_type == PositionType.branch or
-            position_type == PositionType.tag):
-        position_name = current_position.split('\\')[-1]
-        click.echo(f"On {position_type.name} {position_name}\n")
-    else:
-        click.echo(f"On commit {current_position.name}\n")
+    current_position, position_type = repository.current_position_with_type
+    click.echo(f"On {position_type.name} {current_position}\n")
 
 
 def _print_untracked_files(repository):
-    _print_files(repository, _get_untracked_files, "Nothing added to commit",
+    _print_files(repository, _get_untracked_files, "No untracked files",
                  "Untracked files:")
 
 
@@ -62,6 +54,7 @@ def _print_files(repository, get_files, message_if_no_files, message):
         click.echo(message)
         for file in files:
             click.echo(f"\t{file}")
+    click.echo()
 
 
 def _get_untracked_files(repository):
@@ -73,9 +66,8 @@ def _get_untracked_files(repository):
 def _get_subdirectories(repository, directory):
     subdirectories = set()
     for obj in directory.iterdir():
-        if obj.is_dir():
+        if obj.is_dir() and obj != repository.cvs:
             subdirectories.add(obj)
-    subdirectories.remove(repository.cvs)
     return subdirectories
 
 
@@ -93,9 +85,11 @@ def _is_untracked(repository, file):
 
 
 def _get_files_ready_for_commit(repository):
+    if not repository.has_commits():
+        return _get_indexed_files_info(repository).keys()
     files_ready_for_commit = []
     indexed_files_info = _get_indexed_files_info(repository)
-    tree = _get_commit_tree(repository, get_current_commit(repository))
+    tree = _get_commit_tree(repository, repository.current_commit)
     files_from_commit = _get_info_from_commit_tree(repository, tree)
     for indexed_file_info in indexed_files_info:
         if indexed_file_info in files_from_commit:
@@ -145,28 +139,6 @@ def _get_blobs(repository, tree):
     return blobs
 
 
-def get_current_commit(repository):
-    with open(repository.head) as head:
-        position = head.readline()
-        position_type = _get_type_of_position(position)
-        if (position_type == PositionType.branch or
-                position_type == PositionType.tag):
-            with open(Path(repository.cvs / position)) as current_position:
-                current_commit = current_position.readline()
-        else:
-            current_commit = position
-    return current_commit
-
-
-def _get_type_of_position(position):
-    if "heads" in position:
-        return PositionType.branch
-    if "tags" in position:
-        return PositionType.tag
-    else:
-        return PositionType.commit
-
-
 def _get_modified_files(repository):
     modified_files = []
     working_directory_tracked_files = _bfs(repository.path,
@@ -198,9 +170,3 @@ def _bfs(root, get_children, get_values, must_be_in_answer, *args):
         for child in children:
             queue.append(child)
     return answer
-
-
-class PositionType(Enum):
-    branch = 0,
-    tag = 1,
-    commit = 2

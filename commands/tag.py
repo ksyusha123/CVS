@@ -16,11 +16,11 @@ def tag_command(name, commit):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-        sys.exit()
+        return
     repository.init_required_paths()
     if name is None:
         _print_all_tags(repository)
-        sys.exit()
+        return
     _create_tag(repository, name, commit)
 
 

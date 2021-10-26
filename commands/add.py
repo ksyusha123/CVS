@@ -20,7 +20,7 @@ def add_command(obj_name):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-        sys.exit()
+        return
     if not Path(repository.path / obj_name).exists():
         click.echo("File not found. Check path name")
         return

@@ -6,7 +6,6 @@ from repository import Repository
 from commands.reset import replace_current_branch
 from commands.reset import get_commit_from_end
 from commands.commit import commit_command
-from commands.status import get_current_commit
 
 
 @click.command(help="Combines commits")
@@ -19,9 +18,9 @@ def squash_command(commits_number):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-        sys.exit()
+        return
     repository.init_required_paths()
-    current_commit = get_current_commit(repository)
+    current_commit = repository.current_commit
     message = _get_commit_message(repository, current_commit)
     replace_current_branch(repository,
                            get_commit_from_end(repository, commits_number))

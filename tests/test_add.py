@@ -5,6 +5,7 @@ from os.path import relpath
 from commands import add
 from commands import init
 from repository import Repository
+from helper import delete_directory
 
 
 class TestAdd:
@@ -54,20 +55,12 @@ class TestAdd:
             file_hash = index.readline().split()[1]
         assert file_hash == modified_file_hash
 
-    @pytest.mark.parametrize(("content", "expected"),
-                             [("", "fef5d3bff5779d32d22f11c494250c4160063220"),
-                              ("some_text",
-                               "899a8f3e79b59c5bcb8c0267000f90efc6d05fe2")])
-    def test_calculate_hash(self, content, expected):
-        with open(self.file, 'w') as f:
-            f.write(content)
-        assert expected == add.calculate_hash(self.repository, self.file)
+    # @pytest.mark.parametrize(("content", "expected"),
+    #                          [("", "fef5d3bff5779d32d22f11c494250c4160063220"),
+    #                           ("some_text",
+    #                            "899a8f3e79b59c5bcb8c0267000f90efc6d05fe2")])
+    # def test_calculate_hash(self, content, expected):
+    #     with open(self.file, 'w') as f:
+    #         f.write(content)
+    #     assert expected == add.calculate_hash(self.repository, self.file)
 
-
-def delete_directory(directory):
-    for obj in directory.iterdir():
-        if obj.is_dir():
-            delete_directory(obj)
-        else:
-            obj.unlink()
-    directory.rmdir()

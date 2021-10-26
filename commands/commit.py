@@ -6,6 +6,7 @@ from pathlib import Path
 from checksumdir import dirhash
 
 from repository import Repository
+from commands.status import _get_files_ready_for_commit
 
 
 @click.command(help="Commits changes")
@@ -19,8 +20,11 @@ def commit_command(message):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-        sys.exit()
+        return
     repository.init_required_paths()
+    if len(_get_files_ready_for_commit(repository)) == 0:
+        click.echo("No files added")
+        return
     repository_hash = dirhash(repository.path, 'sha1')
     _make_graph(repository.path, repository_hash, repository)
     commit_hash = _create_commit_object(

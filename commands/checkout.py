@@ -20,7 +20,7 @@ def checkout_command(position, branch_name):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-        sys.exit()
+        return
     repository.init_required_paths()
     if branch_name:
         create_branch(repository, branch_name)

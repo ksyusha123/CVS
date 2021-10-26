@@ -15,7 +15,7 @@ def init_command():
     repository = Repository(Path.cwd())
     if repository.is_initialised:
         click.echo("Repository already exists")
-        sys.exit()
+        return
     repository.init_required_paths()
     repository.index.touch()
     with open(repository.head, 'w') as head:

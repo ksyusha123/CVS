@@ -15,7 +15,7 @@ def branch_command(name):
     repository = Repository(Path.cwd())
     if not repository.is_initialised:
         click.echo("Init a repository first")
-        sys.exit()
+        return
     repository.init_required_paths()
     if name is None:
         _print_all_branches(repository)
@@ -32,7 +32,7 @@ def create_branch(repository, name):
 
 
 def _print_all_branches(repository):
-    current_branch = get_current_position(repository).split('\\')[-1]
+    current_branch = repository.current_position.split('\\')[-1]
     for branch_name in repository.branches:
         if branch_name == current_branch:
             click.echo(f"->{current_branch}")
@@ -40,7 +40,7 @@ def _print_all_branches(repository):
             click.echo(f"  {branch_name}")
 
 
-def get_current_position(repository):
-    with open(repository.head) as head:
-        current_branch = head.readline()
-    return current_branch
+# def get_current_position(repository):
+#     with open(repository.head) as head:
+#         current_branch = head.readline()
+#     return current_branch
