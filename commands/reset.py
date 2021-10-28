@@ -4,7 +4,7 @@ import click
 import zlib
 from multiprocessing import Pool
 
-from repository import Repository
+from command import Command
 
 
 @click.command(help='Replaces HEAD and current branch to given commit')
@@ -19,24 +19,22 @@ from repository import Repository
               help='Updates index')
 @click.argument('commit', required=True)
 def reset(commit, option):
-    reset_command(commit, option)
+    ResetCommand().execute(commit, option)
 
 
-def reset_command(commit, option):
-    repository = Repository(Path.cwd())
-    if not repository.is_initialised:
-        click.echo("Init a repository first")
-        return
-    repository.init_required_paths()
-    if not repository.has_commits():
-        click.echo("No commits yet")
-        return
-    commit = _get_commit_hash(repository, commit)
-    replace_current_branch(repository, commit)
-    if option == 'mixed' or option == 'hard':
-        update_index(repository, commit)
-        if option == 'hard':
-            update_working_directory(repository)
+class ResetCommand(Command):
+
+    def execute(self, commit, option):
+        repository = self.get_repo()
+        if not repository.has_commits():
+            click.echo("No commits yet")
+            return
+        commit = _get_commit_hash(repository, commit)
+        replace_current_branch(repository, commit)
+        if option == 'mixed' or option == 'hard':
+            update_index(repository, commit)
+            if option == 'hard':
+                update_working_directory(repository)
 
 
 def replace_current_branch(repository, commit):

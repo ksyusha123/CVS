@@ -1,29 +1,25 @@
-import sys
 from pathlib import Path
 import click
 
-from repository import Repository
+from command import Command
 
 
 @click.command(help="Shows commit history for current branch")
 def log():
-    log_command()
+    LogCommand().execute()
 
 
-def log_command():
-    repository = Repository(Path.cwd())
-    if not repository.is_initialised:
-        click.echo("Init a repository first")
-        return
-    repository.init_required_paths()
-    if not repository.has_commits():
-        click.echo("No commits yet")
-        return
-    with open(repository.head) as head:
-        current_branch = head.readline()
-        with open(Path(repository.cvs / current_branch)) as current:
-            commit = current.readline()
-            _print_commits_tree(commit, repository)
+class LogCommand(Command):
+    def execute(self):
+        repository = self.get_repo()
+        if not repository.has_commits():
+            click.echo("No commits yet")
+            return
+        with open(repository.head) as head:
+            current_branch = head.readline()
+            with open(Path(repository.cvs / current_branch)) as current:
+                commit = current.readline()
+                _print_commits_tree(commit, repository)
 
 
 def _print_commits_tree(commit, repository):

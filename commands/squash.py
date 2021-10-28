@@ -1,30 +1,27 @@
 import click
-import sys
 from pathlib import Path
 
-from repository import Repository
+from command import Command
 from commands.reset import replace_current_branch
 from commands.reset import get_commit_from_end
-from commands.commit import commit_command
+from commands.commit import CommitCommand
 
 
 @click.command(help="Combines commits")
 @click.argument('commits_number', type=int)
 def squash(commits_number):
-    squash_command(commits_number)
+    SquashCommand().execute(commits_number)
 
 
-def squash_command(commits_number):
-    repository = Repository(Path.cwd())
-    if not repository.is_initialised:
-        click.echo("Init a repository first")
-        return
-    repository.init_required_paths()
-    current_commit = repository.current_commit
-    message = _get_commit_message(repository, current_commit)
-    replace_current_branch(repository,
-                           get_commit_from_end(repository, commits_number))
-    commit_command(message)
+class SquashCommand(Command):
+
+    def execute(self, commits_number):
+        repository = self.get_repo()
+        current_commit = repository.current_commit
+        message = _get_commit_message(repository, current_commit)
+        replace_current_branch(repository,
+                               get_commit_from_end(repository, commits_number))
+        CommitCommand().execute(message)
 
 
 def _get_commit_message(repository, commit_hash):

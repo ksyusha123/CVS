@@ -1,27 +1,24 @@
 import click
-import sys
 from pathlib import Path
 
-from repository import Repository
+from command import Command
 
 
 @click.command(help="Creates tag to commit")
 @click.argument('name', required=False)
 @click.argument('commit', required=False)
 def tag(name, commit):
-    tag_command(name, commit)
+    TagCommand().execute(name, commit)
 
 
-def tag_command(name, commit):
-    repository = Repository(Path.cwd())
-    if not repository.is_initialised:
-        click.echo("Init a repository first")
-        return
-    repository.init_required_paths()
-    if name is None:
-        _print_all_tags(repository)
-        return
-    _create_tag(repository, name, commit)
+class TagCommand(Command):
+
+    def execute(self, tag_name, commit=None):
+        repository = self.get_repo()
+        if tag_name is None:
+            _print_all_tags(repository)
+            return
+        _create_tag(repository, tag_name, commit)
 
 
 def _print_all_tags(repository):

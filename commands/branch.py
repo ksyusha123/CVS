@@ -1,26 +1,29 @@
-import sys
 import click
 from pathlib import Path
 
-from repository import Repository
+from command import Command
 
 
 @click.command(help="Creates new branch")
-@click.argument('name', required=False)
-def branch(name):
-    branch_command(name)
+@click.argument('branch_name', required=False)
+def branch(branch_name):
+    BranchCommand().execute(branch_name)
 
 
-def branch_command(name):
-    repository = Repository(Path.cwd())
-    if not repository.is_initialised:
-        click.echo("Init a repository first")
-        return
-    repository.init_required_paths()
-    if name is None:
-        _print_all_branches(repository)
-        sys.exit()
-    create_branch(repository, name)
+class BranchCommand(Command):
+
+    def execute(self, branch_name):
+        repository = self.get_repo()
+        if branch_name is None:
+            _print_all_branches(repository)
+            return
+        if not self._check_repository_is_ready(repository):
+            click.echo("Make initial commit first")
+        create_branch(repository, branch_name)
+
+    @staticmethod
+    def _check_repository_is_ready(repository):
+        return repository.has_commits()
 
 
 def create_branch(repository, name):
@@ -38,9 +41,3 @@ def _print_all_branches(repository):
             click.echo(f"->{current_branch}")
         else:
             click.echo(f"  {branch_name}")
-
-
-# def get_current_position(repository):
-#     with open(repository.head) as head:
-#         current_branch = head.readline()
-#     return current_branch

@@ -2,9 +2,9 @@ import pytest
 from pathlib import Path
 from checksumdir import dirhash
 
-from commands import commit
-from commands import add
-from commands import init
+from commands.commit import CommitCommand
+from commands.add import AddCommand
+from commands.init import InitCommand
 from helper import delete_directory
 from repository import Repository
 
@@ -12,7 +12,7 @@ from repository import Repository
 class TestCommit:
 
     def setup(self):
-        init.init_command()
+        InitCommand().execute()
         self.repository = Repository(Path.cwd())
         self.repository.init_required_paths()
         self.file = Path('file')
@@ -23,11 +23,11 @@ class TestCommit:
         self.file.unlink()
 
     def test_not_create_commit_if_no_files_to_commit(self):
-        add.add_command(self.file)
-        commit.commit_command("first")
+        AddCommand().execute(self.file)
+        CommitCommand().execute("first")
         with open(self.repository.master) as branch:
             first_commit_hash = branch.readline()
-        commit.commit_command("second")
+        CommitCommand().execute("second")
         with open(self.repository.master) as branch:
             second_commit_hash = branch.readline()
         assert first_commit_hash == second_commit_hash
@@ -39,9 +39,9 @@ class TestCommit:
         assert first_commit == second_commit
 
     def test_create_new_commit(self):
-        add.add_command(self.file)
+        AddCommand().execute(self.file)
         repository_hash = dirhash(self.repository.path, 'sha1')
-        commit.commit_command("first")
+        CommitCommand().execute("first")
         with open(self.repository.master) as branch:
             first_commit_hash = branch.readline()
         with open(Path(self.repository.objects / first_commit_hash)) as first:
@@ -50,13 +50,13 @@ class TestCommit:
                 f"tree {repository_hash}\n\nfirst")
 
     def test_correct_commit_connection(self):
-        add.add_command(self.file)
-        commit.commit_command("first")
+        AddCommand().execute(self.file)
+        CommitCommand().execute("first")
         expected_parent_commit = self.repository.current_commit
         with open(self.file, 'w') as f:
             f.write("text")
-        add.add_command(self.file)
-        commit.commit_command("second")
+        AddCommand().execute(self.file)
+        CommitCommand().execute("second")
         child_commit = self.repository.current_commit
         with open(Path(self.repository.objects / child_commit)) as child:
             actual_parent_commit = \

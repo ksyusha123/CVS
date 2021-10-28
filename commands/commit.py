@@ -1,35 +1,32 @@
-import sys
 import click
 import os
 import hashlib
 from pathlib import Path
 from checksumdir import dirhash
 
-from repository import Repository
-from commands.status import _get_files_ready_for_commit
+from commands.status import get_files_ready_for_commit
+from command import Command
 
 
 @click.command(help="Commits changes")
 @click.option('-m', '--message', 'message',
               required=True, help='Commit message')
 def commit(message):
-    commit_command(message)
+    CommitCommand().execute(message)
 
 
-def commit_command(message):
-    repository = Repository(Path.cwd())
-    if not repository.is_initialised:
-        click.echo("Init a repository first")
-        return
-    repository.init_required_paths()
-    if len(_get_files_ready_for_commit(repository)) == 0:
-        click.echo("No files added")
-        return
-    repository_hash = dirhash(repository.path, 'sha1')
-    _make_graph(repository.path, repository_hash, repository)
-    commit_hash = _create_commit_object(
-        repository_hash, repository, message)
-    _direct_current_branch(commit_hash, repository)
+class CommitCommand(Command):
+
+    def execute(self, message):
+        repository = self.get_repo()
+        if len(get_files_ready_for_commit(repository)) == 0:
+            click.echo("No files added")
+            return
+        repository_hash = dirhash(repository.path, 'sha1')
+        _make_graph(repository.path, repository_hash, repository)
+        commit_hash = _create_commit_object(
+            repository_hash, repository, message)
+        _direct_current_branch(commit_hash, repository)
 
 
 def _make_graph(current_directory, current_dir_hash, repository):
@@ -60,11 +57,11 @@ def _get_info_from_index(file, repository):
 
 def _create_commit_object(root_hash, repository, message):
     parent = _find_parent_commit(repository)
-    with open(Path(repository.objects/'tmp'), 'w') as commit:
-        commit.write(f"tree {root_hash}\n")
+    with open(Path(repository.objects/'tmp'), 'w') as commit_obj:
+        commit_obj.write(f"tree {root_hash}\n")
         if parent is not None:
-            commit.write(f"parent {parent}\n")
-        commit.write(f"\n{message}")
+            commit_obj.write(f"parent {parent}\n")
+        commit_obj.write(f"\n{message}")
     commit_hash = _calculate_hash(Path(repository.objects/'tmp'))
     os.rename(Path(repository.objects/'tmp'),
               Path(repository.objects/commit_hash))
@@ -85,8 +82,8 @@ def _find_parent_commit(repository):
 
 def _calculate_hash(file_path):
     with open(file_path, 'rb') as binary_file:
-        hash = hashlib.sha1(binary_file.read()).hexdigest()
-    return hash
+        file_hash = hashlib.sha1(binary_file.read()).hexdigest()
+    return file_hash
 
 
 def _direct_current_branch(commit_hash, repository):

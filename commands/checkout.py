@@ -3,7 +3,7 @@ import click
 from os.path import relpath
 from pathlib import Path
 
-from repository import Repository
+from command import Command
 from commands.reset import update_index, update_working_directory
 from commands.branch import create_branch
 
@@ -13,32 +13,32 @@ from commands.branch import create_branch
 @click.option('-b', '--branch', 'branch_name', required=False,
               help="Creates new branch with given name")
 def checkout(position, branch_name):
-    checkout_command(position, branch_name)
+    CheckoutCommand().execute(position, branch_name)
 
 
-def checkout_command(position, branch_name):
-    repository = Repository(Path.cwd())
-    if not repository.is_initialised:
-        click.echo("Init a repository first")
-        return
-    repository.init_required_paths()
-    if branch_name:
-        create_branch(repository, branch_name)
-        position = relpath(
-            Path(repository.heads / branch_name), repository.cvs)
+class CheckoutCommand(Command):
+
+    def execute(self, position, branch_name):
+        repository = self.get_repo()
+        if branch_name:
+            create_branch(repository, branch_name)
+            position = relpath(
+                Path(repository.heads / branch_name), repository.cvs)
+            _replace_head(repository, position)
+            sys.exit()
+        if position in repository.branches:
+            position = relpath(Path(repository.heads / position),
+                               repository.cvs)
+            with open(repository.cvs / position) as current_branch:
+                commit = current_branch.readline()
+        elif position in repository.all_tags:
+            position = relpath(Path(repository.tags / position),
+                               repository.cvs)
+            with open(repository.cvs / position) as current_tag:
+                commit = current_tag.readline()
         _replace_head(repository, position)
-        sys.exit()
-    if position in repository.branches:
-        position = relpath(Path(repository.heads / position), repository.cvs)
-        with open(repository.cvs / position) as current_branch:
-            commit = current_branch.readline()
-    elif position in repository.all_tags:
-        position = relpath(Path(repository.tags / position), repository.cvs)
-        with open(repository.cvs / position) as current_tag:
-            commit = current_tag.readline()
-    _replace_head(repository, position)
-    update_index(repository, commit)
-    update_working_directory(repository)
+        update_index(repository, commit)
+        update_working_directory(repository)
 
 
 def _replace_head(repository, position):

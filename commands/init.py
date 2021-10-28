@@ -1,23 +1,25 @@
-import sys
 from os.path import relpath
-from pathlib import Path
 import click
 
-from repository import Repository
+from command import Command
 
 
 @click.command(help="Initialises a repository for current working directory")
 def init():
-    init_command()
+    InitCommand().execute()
 
 
-def init_command():
-    repository = Repository(Path.cwd())
-    if repository.is_initialised:
-        click.echo("Repository already exists")
-        return
-    repository.init_required_paths()
-    repository.index.touch()
-    with open(repository.head, 'w') as head:
-        head.write(relpath(repository.master, repository.cvs))
-    click.echo("Repository has been created successfully")
+class InitCommand(Command):
+
+    def __init__(self):
+        super().__init__("Repository exists")
+
+    def check(self, repository):
+        return not repository.is_initialised
+
+    def execute(self):
+        repository = self.get_repo()
+        repository.index.touch()
+        with open(repository.head, 'w') as head:
+            head.write(relpath(repository.master, repository.cvs))
+        click.echo("Repository has been created successfully")

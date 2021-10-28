@@ -1,12 +1,12 @@
 import pytest
 from pathlib import Path
 
-from commands.init import init_command
+from commands.init import InitCommand
 from repository import Repository
 
 
 def test_init():
-    init_command()
+    InitCommand().execute()
     repository = Repository(Path.cwd())
     assert repository.is_initialised
 
