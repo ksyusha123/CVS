@@ -1,6 +1,6 @@
-import pytest
+import unittest
 from pathlib import Path
-from checksumdir import dirhash
+import re
 
 from commands.commit import CommitCommand
 from commands.add import AddCommand
@@ -9,22 +9,22 @@ from helper import delete_directory
 from repository import Repository
 
 
-class TestCommit:
+class TestCommit(unittest.TestCase):
 
-    def setup(self):
+    def setUp(self):
         InitCommand().execute()
         self.repository = Repository(Path.cwd())
         self.repository.init_required_paths()
         self.file = Path('file')
         self.file.touch()
+        AddCommand().execute(self.file)
+        CommitCommand().execute("first")
 
-    def teardown(self):
+    def tearDown(self):
         delete_directory(Path(Path.cwd() / '.cvs'))
         self.file.unlink()
 
     def test_not_create_commit_if_no_files_to_commit(self):
-        AddCommand().execute(self.file)
-        CommitCommand().execute("first")
         with open(self.repository.master) as branch:
             first_commit_hash = branch.readline()
         CommitCommand().execute("second")
@@ -39,19 +39,13 @@ class TestCommit:
         assert first_commit == second_commit
 
     def test_create_new_commit(self):
-        AddCommand().execute(self.file)
-        repository_hash = dirhash(self.repository.path, 'sha1')
-        CommitCommand().execute("first")
         with open(self.repository.master) as branch:
             first_commit_hash = branch.readline()
         with open(Path(self.repository.objects / first_commit_hash)) as first:
             first_commit = first.read()
-        assert (first_commit ==
-                f"tree {repository_hash}\n\nfirst")
+        assert re.fullmatch(r'tree \w{40}\n\nfirst', first_commit)
 
     def test_correct_commit_connection(self):
-        AddCommand().execute(self.file)
-        CommitCommand().execute("first")
         expected_parent_commit = self.repository.current_commit
         with open(self.file, 'w') as f:
             f.write("text")
@@ -63,6 +57,5 @@ class TestCommit:
                 child.readlines()[1].split()[1].split('\n')[0]
         assert expected_parent_commit == actual_parent_commit
 
-
-    # def test_create_initial_commit(self):
-    #     commit.commit_command()
+    def test_cannot_work_with_incorrect_commit(self):
+        #todo

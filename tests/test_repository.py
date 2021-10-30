@@ -24,6 +24,9 @@ class TestRepositorySimple(unittest.TestCase):
     def tearDownClass(cls):
         delete_directory(Path(Path.cwd() / '.cvs'))
 
+    def test_repository_is_initialised(self):
+        assert self.repository.is_initialised
+
     def test_current_position(self):
         self.assertEqual("refs\\heads\\master",
                          self.repository.current_position())
@@ -46,14 +49,6 @@ class TestRepositorySimple(unittest.TestCase):
 
     def test_no_branches_if_no_commit(self):
         self.assertEqual(self.repository.branches, set())
-
-    def test_create_objects_after_init(self):
-        self.assertTrue(self.repository.objects.exists())
-        self.assertTrue(self.repository.index.exists())
-        self.assertTrue(self.repository.cvs.exists())
-        self.assertTrue(self.repository.refs.exists())
-        self.assertTrue(self.repository.heads.exists())
-        self.assertTrue(self.repository.tags.exists())
 
     def test_has_no_commits(self):
         self.assertFalse(self.repository.has_commits())

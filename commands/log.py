@@ -19,15 +19,20 @@ class LogCommand(Command):
             current_branch = head.readline()
             with open(Path(repository.cvs / current_branch)) as current:
                 commit = current.readline()
-                _print_commits_tree(commit, repository)
+                self._print_commits_log(commit, repository)
 
+    def _print_commits_log(self, commit, repository):
+        commits_log = self.get_commits_log(repository, commit)
+        for commit in commits_log:
+            click.echo(commit)
 
-def _print_commits_tree(commit, repository):
-    while True:
-        with open(Path(repository.objects / commit)) as commit_obj:
-            lines = commit_obj.readlines()
-            click.echo(f"{commit} {lines[-1]}")
-            if len(lines) == 4:
-                commit = lines[1].split()[1]
-            else:
-                break
+    @staticmethod
+    def get_commits_log(repository, commit):
+        while True:
+            with open(Path(repository.objects / commit)) as commit_obj:
+                lines = commit_obj.readlines()
+                yield commit, lines[-1]
+                if len(lines) == 4:
+                    commit = lines[1].split()[1]
+                else:
+                    break

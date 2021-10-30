@@ -1,5 +1,6 @@
 from pathlib import Path
 from abc import ABCMeta, abstractmethod
+import click
 
 from repository import Repository
 
@@ -10,7 +11,7 @@ class Command:
     def __init__(self, message_if_error="Init a repository"):
         repository = Repository(Path.cwd())
         if not self.check(repository):
-            print(message_if_error)
+            click.echo(message_if_error)
             return
 
     @abstractmethod

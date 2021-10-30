@@ -23,38 +23,55 @@ class AddCommand(Command):
             click.echo("File not found. Check path name")
             return
         repository.init_required_paths()
-        _add(repository, obj_name)
+        self._add(repository, obj_name)
 
-
-def _add(repository, obj_name):
-    if Path(obj_name).is_dir():
-        _add_directory(repository, Path(obj_name))
-    else:
-        _add_file(repository, Path(obj_name))
-
-
-def _add_directory(repository, directory):
-    if directory.name == '.cvs':
-        return
-    for obj in directory.iterdir():
-        if obj.is_file():
-            _add_file(repository, relpath(obj, repository.path))
+    def _add(self, repository, obj_name):
+        if Path(obj_name).is_dir():
+            self._add_directory(repository, Path(obj_name))
         else:
-            _add_directory(repository, obj)
+            self._add_file(repository, Path(obj_name))
 
+    def _add_directory(self, repository, directory):
+        if directory.name == '.cvs':
+            return
+        for obj in directory.iterdir():
+            if obj.is_file():
+                self._add_file(repository, relpath(obj, repository.path))
+            else:
+                self._add_directory(repository, obj)
 
-def _add_file(repository, file):
-    file_hash = calculate_hash(repository, file)
-    if not Path(repository.objects / file_hash).exists():
-        _create_blob(file_hash, repository, file)
-    _add_to_index(file_hash, repository, file)
+    def _add_file(self, repository, file):
+        file_hash = calculate_hash(repository, file)
+        if not Path(repository.objects / file_hash).exists():
+            _create_blob(file_hash, repository, file)
+        self._add_to_index(file_hash, repository, file)
+
+    @staticmethod
+    def _add_to_index(file_hash, repository, file):
+        is_indexed_old = False
+        with open(repository.index) as index:
+            index_read = index.read()
+            filename_position_index = index_read.find(str(file))
+            if filename_position_index != -1:
+                is_indexed_old = True
+                old_hash_position = \
+                    filename_position_index + len(str(file)) + 1
+                index_read = index_read.replace(
+                    index_read[old_hash_position:old_hash_position + 40],
+                    file_hash)
+        if is_indexed_old:
+            with open(repository.index, 'w') as index:
+                index.write(index_read)
+        else:
+            with open(repository.index, 'a') as index:
+                index.write(f"{file} {file_hash}\n")
 
 
 def calculate_hash(repository, file):
     content_size = getsize(file)
     string_to_hash = f"blob {content_size}\\0"
     sha1 = hashlib.sha1(string_to_hash.encode())
-    with open(Path(repository.path/file), 'rb') as f:
+    with open(Path(repository.path / file), 'rb') as f:
         while True:
             content = f.read()
             if not content:
@@ -92,22 +109,3 @@ def _split_file(repository, file):
                 break
             parts.append(content)
     return parts
-
-
-def _add_to_index(file_hash, repository, file):
-    is_indexed_old = False
-    with open(repository.index) as index:
-        index_read = index.read()
-        filename_position_index = index_read.find(str(file))
-        if filename_position_index != -1:
-            is_indexed_old = True
-            old_hash_position = \
-                filename_position_index + len(str(file)) + 1
-            index_read = index_read.replace(
-                index_read[old_hash_position:old_hash_position+40], file_hash)
-    if is_indexed_old:
-        with open(repository.index, 'w') as index:
-            index.write(index_read)
-    else:
-        with open(repository.index, 'a') as index:
-            index.write(f"{file} {file_hash}\n")

@@ -1,4 +1,5 @@
-import pytest
+import unittest
+from unittest.mock import patch
 from pathlib import Path
 from os.path import relpath
 
@@ -9,16 +10,16 @@ from repository import Repository
 from helper import delete_directory
 
 
-class TestAdd:
+class TestAdd(unittest.TestCase):
 
-    def setup(self):
+    def setUp(self):
         InitCommand().execute()
         self.repository = Repository(Path.cwd())
         self.repository.init_required_paths()
         self.file = Path('file')
         self.file.touch()
 
-    def teardown(self):
+    def tearDown(self):
         delete_directory(Path(Path.cwd() / '.cvs'))
         self.file.unlink()
 
@@ -40,11 +41,26 @@ class TestAdd:
             assert relpath(file2, Path.cwd()) == index.readline().split()[0]
         delete_directory(Path('directory'))
 
-    def test_file_not_found(self, capfd):
+    def test_add_directory_with_subdirectories(self):
+        directory = Path('directory')
+        directory.mkdir(parents=True, exist_ok=True)
+        file1 = Path(directory / 'file1')
+        file1.touch()
+        subdirectory = Path(directory / 'subdirectory')
+        subdirectory.mkdir(parents=True, exist_ok=True)
+        file2 = Path(subdirectory / 'file2')
+        file2.touch()
+        AddCommand().execute('directory')
+        with open(self.repository.index) as index:
+            assert {'directory\\file1', 'directory\\subdirectory\\file2'} == \
+                   {index.readline().split()[0], index.readline().split()[0]}
+        delete_directory(directory)
+
+    @patch('click.echo')
+    def test_file_not_found(self, mock_click_echo):
         AddCommand().execute('non_existing')
-        out, err = capfd.readouterr()
-        add_message = out.split('\n')[1]
-        assert add_message == "File not found. Check path name"
+        assert mock_click_echo.called_once_with(
+            "File not found. Check path name")
 
     def test_add_modified_file(self):
         AddCommand().execute(self.file.name)
