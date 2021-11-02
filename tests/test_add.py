@@ -1,4 +1,3 @@
-import unittest
 from unittest.mock import patch
 from pathlib import Path
 from os.path import relpath
@@ -8,9 +7,10 @@ from commands.add import calculate_hash
 from commands.init import InitCommand
 from repository import Repository
 from helper import delete_directory
+from test_command_base import TestCommand
 
 
-class TestAdd(unittest.TestCase):
+class TestAdd(TestCommand):
 
     def setUp(self):
         InitCommand().execute()

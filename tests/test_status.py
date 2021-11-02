@@ -8,9 +8,10 @@ from commands.commit import commit
 from commands.reset import reset
 from repository import Repository
 from helper import delete_directory
+from test_command_base import TestCommand
 
 
-class TestStatus:
+class TestStatus(TestCommand):
 
     def setup(self):
         InitCommand().execute()

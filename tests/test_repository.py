@@ -1,6 +1,6 @@
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import patch, PropertyMock
 
 from repository import Repository
 from position_type import PositionType
@@ -29,7 +29,7 @@ class TestRepositorySimple(unittest.TestCase):
 
     def test_current_position(self):
         self.assertEqual("refs\\heads\\master",
-                         self.repository.current_position())
+                         self.repository.current_position)
 
     def test_current_position_with_type(self):
         self.assertEqual(("master", PositionType.branch),
@@ -104,9 +104,9 @@ class TestRepositoryWithMagicMock(unittest.TestCase):
         delete_directory(Path(Path.cwd() / '.cvs'))
 
     def test_current_commit_if_current_position_is_commit(self):
-        self.repository = Repository(Path.cwd())
-        self.repository.init_required_paths()
-        self.repository.current_position = MagicMock(
-            return_value="1234567891011121314151617owefjlkdnfnmmmm")
-        self.assertEqual(self.repository.current_commit,
-                         "1234567891011121314151617owefjlkdnfnmmmm")
+        with patch('repository.Repository.current_position',
+                   new_callable=PropertyMock) as mock_current_position:
+            mock_current_position.return_value = \
+                "1234567891011121314151617owefjlkdnfnmmmm"
+            self.assertEqual(self.repository.current_commit,
+                             "1234567891011121314151617owefjlkdnfnmmmm")

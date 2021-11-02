@@ -17,6 +17,9 @@ class BranchCommand(Command):
         if branch_name is None:
             self._print_all_branches(repository)
             return
+        if branch_name in repository.branches:
+            click.echo("Branch with given name already exists")
+            return
         if not self._check_repository_is_ready(repository):
             click.echo("Make initial commit first")
             return

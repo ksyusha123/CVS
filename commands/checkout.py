@@ -1,4 +1,3 @@
-import sys
 import click
 from os.path import relpath
 from pathlib import Path
@@ -25,17 +24,12 @@ class CheckoutCommand(Command):
             position = relpath(
                 Path(repository.heads / branch_name), repository.cvs)
             _replace_head(repository, position)
-            sys.exit()
+            return
         if position in repository.branches:
             position = relpath(Path(repository.heads / position),
                                repository.cvs)
             with open(repository.cvs / position) as current_branch:
                 commit = current_branch.readline()
-        elif position in repository.all_tags:
-            position = relpath(Path(repository.tags / position),
-                               repository.cvs)
-            with open(repository.cvs / position) as current_tag:
-                commit = current_tag.readline()
         _replace_head(repository, position)
         update_index(repository, commit)
         update_working_directory(repository)

@@ -56,6 +56,3 @@ class TestCommit(unittest.TestCase):
             actual_parent_commit = \
                 child.readlines()[1].split()[1].split('\n')[0]
         assert expected_parent_commit == actual_parent_commit
-
-    def test_cannot_work_with_incorrect_commit(self):
-        #todo

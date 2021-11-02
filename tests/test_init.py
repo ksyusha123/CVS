@@ -1,13 +1,13 @@
 from pathlib import Path
-import unittest
 from unittest.mock import patch
 
 from commands.init import InitCommand
 from repository import Repository
 from helper import delete_directory
+from test_command_base import TestCommand
 
 
-class TestInit(unittest.TestCase):
+class TestInit(TestCommand):
 
     @classmethod
     def setUpClass(cls):
@@ -17,6 +17,12 @@ class TestInit(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         delete_directory(Path(Path.cwd() / '.cvs'))
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
 
     def test_create_objects_after_init(self):
         self.assertTrue(self.repository.objects.exists())

@@ -28,13 +28,6 @@ def _print_all_tags(repository):
 
 def _create_tag(repository, name, commit):
     if commit is None:
-        commit = _get_last_commit(repository)
+        commit = repository.current_commit
     with open(Path(repository.tags / name), 'w') as new_tag:
         new_tag.write(commit)
-
-
-def _get_last_commit(repository):
-    with open(repository.head) as head:
-        with open(repository.cvs / head.readline()) as current_branch:
-            current_commit = current_branch.readline()
-    return current_commit

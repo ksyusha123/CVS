@@ -1,10 +1,10 @@
-import sys
 from pathlib import Path
 import click
 import zlib
 from multiprocessing import Pool
 
 from command import Command
+from position_type import PositionType
 
 
 @click.command(help='Replaces HEAD and current branch to given commit')
@@ -30,22 +30,26 @@ class ResetCommand(Command):
             click.echo("No commits yet")
             return
         commit = _get_commit_hash(repository, commit)
-        replace_current_branch(repository, commit)
+        if commit is None:
+            click.echo("There is no such commit")
+            return
+        replace_head_with_branch(repository, commit)
         if option == 'mixed' or option == 'hard':
             update_index(repository, commit)
             if option == 'hard':
                 update_working_directory(repository)
 
 
-def replace_current_branch(repository, commit):
-    with open(repository.head) as head:
-        current_branch = head.readline()
-        with open(Path(repository.cvs / current_branch)) as current:
-            previous_commit = current.readline()
-            with open(Path(repository.cvs / 'ORIG_HEAD'), 'w') as orig_head:
-                orig_head.write(previous_commit)
-        with open(Path(repository.cvs / current_branch), 'w') as current:
+def replace_head_with_branch(repository, commit):
+    with open(Path(repository.cvs / 'ORIG_HEAD'), 'w') as orig_head:
+        orig_head.write(repository.current_commit)
+    current_position = repository.current_position_with_type
+    if current_position[1] == PositionType.branch:
+        with open(Path(repository.cvs / current_position[0]), 'w') as current:
             current.write(commit)
+    else:
+        with open(repository.head, 'w') as head:
+            head.write(commit)
 
 
 def update_index(repository, commit):
@@ -102,7 +106,9 @@ def _split_bytes_file(repository, file):
 
 def _get_commit_hash(repository, commit):
     if '~' in commit:
-        commit = get_commit_from_end(repository, int(commit.split('~')[1]))
+        return get_commit_from_end(repository, int(commit.split('~')[1]))
+    if not Path(repository.objects / commit).exists():
+        return None
     return commit
 
 
@@ -112,8 +118,6 @@ def get_commit_from_end(repository, number):
         with open(Path(repository.objects / current_commit)) as commit:
             lines = commit.readlines()
             if len(lines) < 4:
-                click.echo("There is no such commit")
-                sys.exit()
+                return None
             current_commit = lines[1].split()[1]
     return current_commit
-
