@@ -4,6 +4,8 @@ from pathlib import Path
 from test_command_base import TestCommand
 from repository import Repository
 from commands.reset import ResetCommand
+from commands.add import AddCommand
+from commands.commit import CommitCommand
 
 
 class TestReset(TestCommand):
@@ -60,8 +62,23 @@ class TestReset(TestCommand):
                         mock_update_index.assert_called_once()
                         mock_update_wd.assert_called_once()
 
-    # def test_replace_head_with_branch(self):
-    #     #todo
+    def test_replace_head_with_branch(self):
+        Path('file').touch()
+        AddCommand().execute('file')
+        CommitCommand().execute('initial')
+        first_commit = self.repository.current_commit
+        with open(Path('file'), 'w') as f:
+            f.write("text")
+        AddCommand().execute('file')
+        CommitCommand().execute('second')
+        second_commit = self.repository.current_commit
+        ResetCommand().execute("HEAD~1", option="soft")
+        with open(self.repository.master) as master:
+            assert first_commit == master.readline()
+        with open(Path(self.repository.cvs / 'ORIG_HEAD')) as orig_head:
+            assert second_commit == orig_head.readline()
+        Path('file').unlink()
+
     #
     # def test_update_index(self):
     #     #todo

@@ -1,4 +1,3 @@
-import pytest
 from pathlib import Path
 
 from commands.init import InitCommand
@@ -23,16 +22,4 @@ class TestStatus(TestCommand):
     def teardown(self):
         delete_directory(Path(Path.cwd() / '.cvs'))
         self.file.unlink()
-
-    # def test_print_position(self):
-
-
-    def test_position_is_branch(self, capfd):
-        StatusCommand().execute()
-        out, err = capfd.readouterr()
-        position = out.split('\n')[2]
-        assert position == "On branch master"
-
-    # def test_position_is_commit(self, capfd):
-    #     add_command(self.file)
 

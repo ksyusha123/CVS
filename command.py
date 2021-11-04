@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from abc import ABCMeta, abstractmethod
 import click
@@ -12,7 +13,7 @@ class Command:
         repository = Repository(Path.cwd())
         if not self.check(repository):
             click.echo(message_if_error)
-            return
+            sys.exit()
 
     @abstractmethod
     def execute(self, *args):

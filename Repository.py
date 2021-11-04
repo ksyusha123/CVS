@@ -94,3 +94,21 @@ class Repository:
                 indexed_data = line.split()
                 indexed_files_info[indexed_data[0]] = indexed_data[1]
         return indexed_files_info
+
+    def get_commit_hash_of(self, commit):
+        if '~' in commit:
+            return self._get_commit_from_end(self, int(commit.split('~')[1]))
+        if not Path(self.objects / commit).exists():
+            return None
+        return commit
+
+    @staticmethod
+    def _get_commit_from_end(repository, number):
+        current_commit = repository.current_commit
+        for i in range(number):
+            with open(Path(repository.objects / current_commit)) as commit:
+                lines = commit.readlines()
+                if len(lines) < 4:
+                    return None
+                current_commit = lines[1].split()[1]
+        return current_commit

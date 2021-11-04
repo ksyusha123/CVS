@@ -3,7 +3,6 @@ from pathlib import Path
 from os.path import relpath
 
 from commands.add import AddCommand
-from commands.add import calculate_hash
 from commands.init import InitCommand
 from repository import Repository
 from helper import delete_directory
@@ -59,7 +58,7 @@ class TestAdd(TestCommand):
     @patch('click.echo')
     def test_file_not_found(self, mock_click_echo):
         AddCommand().execute('non_existing')
-        assert mock_click_echo.called_once_with(
+        mock_click_echo.assert_called_once_with(
             "File not found. Check path name")
 
     def test_add_modified_file(self):
@@ -67,7 +66,8 @@ class TestAdd(TestCommand):
         with open(self.file, 'w') as f:
             f.write('some text')
         AddCommand().execute(self.file.name)
-        modified_file_hash = calculate_hash(self.repository, self.file)
+        modified_file_hash = AddCommand.calculate_hash(self.repository,
+                                                       self.file)
         with open(self.repository.index) as index:
             file_hash = index.readline().split()[1]
         assert file_hash == modified_file_hash

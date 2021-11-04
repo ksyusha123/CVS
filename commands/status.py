@@ -3,7 +3,7 @@ from os.path import relpath
 from pathlib import Path
 from collections import deque
 
-from commands.add import calculate_hash
+from commands.add import AddCommand
 from command import Command
 
 
@@ -133,7 +133,7 @@ def _get_modified_files(repository):
                                           _is_tracked, repository)
     indexed_files_info = repository.indexed_files_info
     for file in working_directory_tracked_files:
-        file_hash = calculate_hash(repository, file)
+        file_hash = AddCommand.calculate_hash(repository, file)
         if file_hash != indexed_files_info[file]:
             modified_files.append(file)
     return modified_files
