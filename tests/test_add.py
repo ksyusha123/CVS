@@ -5,7 +5,7 @@ from os.path import relpath
 from commands.add import AddCommand
 from commands.init import InitCommand
 from repository import Repository
-from helper import delete_directory
+from file_manager import delete_directory
 from test_command_base import TestCommand
 
 

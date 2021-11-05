@@ -9,7 +9,7 @@ from commands.init import InitCommand
 from commands.commit import CommitCommand
 from commands.add import AddCommand
 from commands.tag import TagCommand
-from helper import delete_directory
+from file_manager import delete_directory
 
 
 class TestRepositorySimple(unittest.TestCase):
@@ -33,19 +33,20 @@ class TestRepositorySimple(unittest.TestCase):
 
     def test_current_position_with_type(self):
         self.assertEqual(("master", PositionType.branch),
-                         self.repository.current_position_with_type)
+                         (self.repository.current_position.name,
+                          self.repository.current_position.type))
 
-    def test_get_type_of_position(self):
-        params = [("refs\\heads\\master", PositionType.branch),
-                  ("refs\\heads\\main", PositionType.branch),
-                  ("refs\\tags\\tag", PositionType.tag),
-                  ("1234567891011121314151617owefjlkdnfnmmmm",
-                   PositionType.commit)]
-        for position, expected in params:
-            with self.subTest():
-                self.assertEqual(expected,
-                                 self.repository._get_type_of_position(
-                                     position))
+    # def test_get_type_of_position(self):
+    #     params = [("refs\\heads\\master", PositionType.branch),
+    #               ("refs\\heads\\main", PositionType.branch),
+    #               ("refs\\tags\\tag", PositionType.tag),
+    #               ("1234567891011121314151617owefjlkdnfnmmmm",
+    #                PositionType.commit)]
+    #     for position, expected in params:
+    #         with self.subTest():
+    #             self.assertEqual(expected,
+    #                              self.repository._get_type_of_position(
+    #                                  position))
 
     def test_no_branches_if_no_commit(self):
         self.assertEqual(self.repository.branches, set())

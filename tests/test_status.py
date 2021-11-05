@@ -6,7 +6,7 @@ from commands.add import AddCommand
 from commands.commit import commit
 from commands.reset import reset
 from repository import Repository
-from helper import delete_directory
+from file_manager import delete_directory
 from test_command_base import TestCommand
 
 

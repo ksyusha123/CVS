@@ -5,7 +5,7 @@ import re
 from commands.commit import CommitCommand
 from commands.add import AddCommand
 from commands.init import InitCommand
-from helper import delete_directory
+from file_manager import delete_directory
 from repository import Repository
 
 

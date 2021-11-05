@@ -3,8 +3,9 @@ from os.path import relpath
 from pathlib import Path
 
 from command import Command
-from commands.reset import update_index, update_working_directory
-from commands.branch import create_branch
+import file_manager
+from commands.branch import BranchCommand
+from position import Position
 
 
 @click.command(help="Replaces HEAD to given position")
@@ -19,38 +20,38 @@ class CheckoutCommand(Command):
 
     def execute(self, position, branch_name):
         repository = self.get_repo()
+        if not repository.has_commits():
+            click.echo("Create repository first")
+            return
         if branch_name:
-            create_branch(repository, branch_name)
-            position = relpath(
-                Path(repository.heads / branch_name), repository.cvs)
-            _replace_head(repository, position)
+            self._create_branch(repository, branch_name)
             return
         if position in repository.branches:
-            position = relpath(Path(repository.heads / position),
-                               repository.cvs)
-            with open(repository.cvs / position) as current_branch:
+            position = Position(relpath(Path(repository.heads / position),
+                                        repository.cvs))
+            with open(repository.cvs / position.path) as current_branch:
                 commit = current_branch.readline()
-        _replace_head(repository, position)
-        update_index(repository, commit)
-        update_working_directory(repository)
+        elif position in repository.all_tags:
+            with open(repository.tags / position) as tag:
+                commit = tag.readline()
+                position = Position(commit)
+        else:
+            if not Path(repository.objects / position).exists():
+                click.echo("That commit does not exist. Check its correctness")
+                return
+            commit = position
+            position = Position(position)
+        self._replace_head(repository, position)
+        file_manager.update_index(repository, commit)
+        file_manager.update_working_directory(repository)
 
+    @staticmethod
+    def _replace_head(repository, position):
+        with open(repository.head, 'w') as head:
+            head.write(position.path)
 
-def _replace_head(repository, position):
-    if _is_branch(repository, position) or _is_tag(repository, position):
-        position = relpath(Path(position), repository.cvs)
-    with open(repository.head, 'w') as head:
-        head.write(position)
-
-
-def _is_branch(repository, position):
-    branches = [branch.name for branch in repository.heads.iterdir()]
-    if position in branches:
-        return True
-    return False
-
-
-def _is_tag(repository, position):
-    tags = [tag.name for tag in repository.tags.iterdir()]
-    if position in tags:
-        return True
-    return False
+    def _create_branch(self, repository, branch_name):
+        BranchCommand.create_branch(repository, branch_name)
+        position = Position(relpath(
+            Path(repository.heads / branch_name), repository.cvs))
+        self._replace_head(repository, position)

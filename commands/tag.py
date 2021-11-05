@@ -33,8 +33,11 @@ class TagCommand(Command):
 
     @staticmethod
     def _create_tag(repository, name, commit):
-        commit = repository.get_commit_hash_of(commit)
         if commit is None:
             commit = repository.current_commit
+        else:
+            commit = repository.get_commit_hash_of(commit)
+            if commit is None:
+                commit = repository.current_commit
         with open(Path(repository.tags / name), 'w') as new_tag:
             new_tag.write(commit)

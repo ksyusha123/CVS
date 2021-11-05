@@ -3,7 +3,7 @@ from pathlib import Path
 
 from commands.init import InitCommand
 from repository import Repository
-from helper import delete_directory
+from file_manager import delete_directory
 
 
 class TestCommand(unittest.TestCase):

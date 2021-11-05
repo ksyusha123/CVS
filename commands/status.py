@@ -89,8 +89,8 @@ def get_files_ready_for_commit(repository):
 
 
 def _print_current_position(repository):
-    current_position, position_type = repository.current_position_with_type
-    click.echo(f"On {position_type.name} {current_position}\n")
+    current_position = repository.current_position
+    click.echo(f"On {current_position.type} {current_position.name}\n")
 
 
 def _get_subdirectories(repository, directory):

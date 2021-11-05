@@ -23,7 +23,7 @@ class BranchCommand(Command):
         if not self._check_repository_is_ready(repository):
             click.echo("Make initial commit first")
             return
-        create_branch(repository, branch_name)
+        self.create_branch(repository, branch_name)
 
     @staticmethod
     def _print_all_branches(repository):
@@ -38,7 +38,7 @@ class BranchCommand(Command):
     def _check_repository_is_ready(repository):
         return repository.has_commits()
 
-
-def create_branch(repository, name):
-    with open(Path(repository.heads / name), 'w') as new_branch:
-        new_branch.write(repository.current_commit)
+    @staticmethod
+    def create_branch(repository, name):
+        with open(Path(repository.heads / name), 'w') as new_branch:
+            new_branch.write(repository.current_commit)

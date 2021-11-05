@@ -22,7 +22,6 @@ class AddCommand(Command):
         if not Path(repository.path / obj_name).exists():
             click.echo("File not found. Check path name")
             return
-        repository.init_required_paths()
         self._add(repository, obj_name)
 
     def _add(self, repository, obj_name):
