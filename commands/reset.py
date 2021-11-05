@@ -44,8 +44,8 @@ class ResetCommand(Command):
             orig_head.write(repository.current_commit)
         current_position = repository.current_position
         if current_position.type == PositionType.branch:
-            with open(Path(repository.cvs / repository.current_position), 'w')\
-                    as current:
+            with open(Path(repository.cvs / repository.current_position.path),
+                      'w') as current:
                 current.write(commit)
         else:
             with open(repository.head, 'w') as head:

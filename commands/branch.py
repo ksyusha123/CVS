@@ -27,7 +27,7 @@ class BranchCommand(Command):
 
     @staticmethod
     def _print_all_branches(repository):
-        current_branch = repository.current_position.split('\\')[-1]
+        current_branch = repository.current_position.name
         for branch_name in repository.branches:
             if branch_name == current_branch:
                 click.echo(f"->{current_branch}")

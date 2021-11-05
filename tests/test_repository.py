@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import patch, PropertyMock
 
 from repository import Repository
-from position_type import PositionType
+from position import Position
 from commands.branch import BranchCommand
 from commands.init import InitCommand
 from commands.commit import CommitCommand
@@ -28,13 +28,12 @@ class TestRepositorySimple(unittest.TestCase):
         assert self.repository.is_initialised
 
     def test_current_position(self):
-        self.assertEqual("refs\\heads\\master",
-                         self.repository.current_position)
-
-    def test_current_position_with_type(self):
-        self.assertEqual(("master", PositionType.branch),
-                         (self.repository.current_position.name,
-                          self.repository.current_position.type))
+        assert "refs\\heads\\master" == self.repository.current_position.path
+    #
+    # def test_current_position_with_type(self):
+    #     self.assertEqual(("master", PositionType.branch),
+    #                      (self.repository.current_position.name,
+    #                       self.repository.current_position.type))
 
     # def test_get_type_of_position(self):
     #     params = [("refs\\heads\\master", PositionType.branch),
@@ -107,7 +106,7 @@ class TestRepositoryWithMagicMock(unittest.TestCase):
     def test_current_commit_if_current_position_is_commit(self):
         with patch('repository.Repository.current_position',
                    new_callable=PropertyMock) as mock_current_position:
-            mock_current_position.return_value = \
-                "1234567891011121314151617owefjlkdnfnmmmm"
-            self.assertEqual(self.repository.current_commit,
-                             "1234567891011121314151617owefjlkdnfnmmmm")
+            mock_current_position.return_value = Position(
+                "1234567891011121314151617owefjlkdnfnmmmm")
+            assert self.repository.current_commit == \
+                   "1234567891011121314151617owefjlkdnfnmmmm"

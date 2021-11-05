@@ -10,11 +10,11 @@ from pathlib import Path
 
 class TestBranch(TestCommand):
 
-    @patch('commands.branch.create_branch')
+    @patch('commands.branch.BranchCommand.create_branch')
     def test_cannot_create_branch_if_no_commits(self, mock_create_branch):
         mock_create_branch.assert_not_called()
 
-    @patch('commands.branch.create_branch')
+    @patch('commands.branch.BranchCommand.create_branch')
     def test_create_branch(self, mock_create_branch):
         with patch('repository.Repository.current_position',
                    new_callable=PropertyMock) as mock_current_position:
@@ -38,7 +38,7 @@ class TestBranch(TestCommand):
                                           call('->master')], any_order=True)
         Path('file').unlink()
 
-    @patch('commands.branch.create_branch')
+    @patch('commands.branch.BranchCommand.create_branch')
     def test_cannot_create_branch_if_exists(self, mock_create_branch):
         Path('file').touch()
         AddCommand().execute('file')

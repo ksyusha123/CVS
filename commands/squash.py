@@ -16,6 +16,9 @@ class SquashCommand(Command):
 
     def execute(self, commits_number):
         repository = self.get_repo()
+        if not repository.has_commits():
+            click.echo("Can't squash without any commit")
+            return
         current_commit = repository.current_commit
         message = self._get_commit_message(repository, current_commit)
         ResetCommand().execute(f"HEAD~{commits_number}", "soft")

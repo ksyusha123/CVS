@@ -19,10 +19,10 @@ class TestTag(TestCommand):
         TagCommand().execute("tag")
         mock_create_tag.assert_not_called()
 
-    @patch('repository.Repository.get_commit_hash_of')
-    def test_create_tag_on_commit(self, mock_get_commit_hash_of):
+    @patch('repository.Repository.current_commit', new_callable=PropertyMock)
+    def test_create_tag_on_commit(self, mock_current_commit):
         Path('file').touch()
-        mock_get_commit_hash_of.return_value = "1234"
+        mock_current_commit.return_value = "1234"
         TagCommand._create_tag(self.repository, "tag", None)
         assert Path(self.repository.tags / "tag").exists()
         with open(Path(self.repository.tags / "tag")) as tag:

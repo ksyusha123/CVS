@@ -35,4 +35,4 @@ class TestInit(TestCommand):
     @patch('click.echo')
     def test_not_create_cvs_if_was_init(self, mock_print):
         InitCommand().execute()
-        assert mock_print.called_once_with("Repository exists")
+        mock_print.assert_called_once_with("Repository exists")

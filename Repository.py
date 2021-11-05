@@ -69,7 +69,7 @@ class Repository:
             with open(Path(self.cvs / position.path)) as current_position:
                 current_commit = current_position.readline()
         else:
-            current_commit = position
+            current_commit = position.path
         return current_commit
 
     @property
