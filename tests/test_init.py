@@ -32,7 +32,8 @@ class TestInit(TestCommand):
         self.assertTrue(self.repository.heads.exists())
         self.assertTrue(self.repository.tags.exists())
 
-    @patch('click.echo')
-    def test_not_create_cvs_if_was_init(self, mock_print):
-        InitCommand().execute()
-        mock_print.assert_called_once_with("Repository exists")
+    @patch('sys.exit')
+    def test_not_create_cvs_if_was_init(self, mock_exit):
+        mock_exit.return_value = None
+        InitCommand()
+        mock_exit.assert_called_once()
