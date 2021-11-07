@@ -5,7 +5,7 @@ from os.path import relpath
 from commands.add import AddCommand
 from commands.init import InitCommand
 from repository import Repository
-from file_manager import delete_directory
+from file_manager import delete_directory, calculate_hash
 from test_command_base import TestCommand
 
 
@@ -66,8 +66,7 @@ class TestAdd(TestCommand):
         with open(self.file, 'w') as f:
             f.write('some text')
         AddCommand().execute(self.file.name)
-        modified_file_hash = AddCommand.calculate_hash(self.repository,
-                                                       self.file)
+        modified_file_hash = calculate_hash(self.repository, self.file)
         with open(self.repository.index) as index:
             file_hash = index.readline().split()[1]
         assert file_hash == modified_file_hash

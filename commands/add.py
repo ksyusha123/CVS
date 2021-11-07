@@ -1,12 +1,10 @@
-import hashlib
 from pathlib import Path
 import click
-import zlib
 from os.path import relpath
-from os.path import getsize
-from multiprocessing import Pool
+
 
 from command import Command
+from file_manager import compress_file, calculate_hash
 
 
 @click.command(help="Indexes files")
@@ -41,7 +39,7 @@ class AddCommand(Command):
                 self._add_directory(repository, obj)
 
     def _add_file(self, repository, file):
-        file_hash = self.calculate_hash(repository, file)
+        file_hash = calculate_hash(repository, file)
         if not Path(repository.objects / file_hash).exists():
             self._create_blob(file_hash, repository, file)
         self._add_to_index(file_hash, repository, file)
@@ -67,44 +65,7 @@ class AddCommand(Command):
                 index.write(f"{file} {file_hash}\n")
 
     @staticmethod
-    def calculate_hash(repository, file):
-        content_size = getsize(file)
-        string_to_hash = f"blob {content_size}\\0"
-        sha1 = hashlib.sha1(string_to_hash.encode())
-        with open(Path(repository.path / file), 'rb') as f:
-            while True:
-                content = f.read()
-                if not content:
-                    break
-                sha1.update(content)
-            file_hash = sha1.hexdigest()
-        return file_hash
-
-    def _create_blob(self, file_hash, repository, file):
+    def _create_blob(file_hash, repository, file):
         with open(Path(repository.objects / file_hash), 'wb') as obj:
-            compressed_content = self._compress_file(repository, file)
+            compressed_content = compress_file(repository, file)
             obj.write(compressed_content)
-
-    def _compress_file(self, repository, file):
-        file_parts = self._split_file(repository, file)
-        with Pool() as pool:
-            compressed_file_parts = pool.map(self._compress_content,
-                                             file_parts)
-        return b'--new-part--'.join(compressed_file_parts)
-
-    @staticmethod
-    def _compress_content(content):
-        compress_obj = zlib.compressobj(level=9)
-        compressed_content = compress_obj.compress(content)
-        return compressed_content
-
-    @staticmethod
-    def _split_file(repository, file):
-        parts = []
-        with open(Path(repository.path / file), 'rb') as f:
-            while True:
-                content = f.read(1048576)
-                if not content:
-                    break
-                parts.append(content)
-        return parts

@@ -38,6 +38,7 @@ class TagCommand(Command):
         else:
             commit = repository.get_commit_hash_of(commit)
             if commit is None:
-                commit = repository.current_commit
+                click.echo("There is no such commit")
+                return
         with open(Path(repository.tags / name), 'w') as new_tag:
             new_tag.write(commit)

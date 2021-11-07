@@ -2,6 +2,9 @@ from pathlib import Path
 
 from position_type import PositionType
 from position import Position
+from file_manager import bfs, get_subdirectories, get_files_from_directory, \
+    is_untracked, is_tracked, get_commit_tree, get_info_from_commit_tree, \
+    calculate_hash
 
 
 class Repository:
@@ -98,3 +101,39 @@ class Repository:
                     return None
                 current_commit = lines[1].split()[1]
         return current_commit
+
+    @property
+    def untracked_files(self):
+        return bfs(self.path, get_subdirectories, get_files_from_directory,
+                   is_untracked, self)
+
+    @property
+    def modified_files(self):
+        modified_files = []
+        working_directory_tracked_files = bfs(self.path,
+                                              get_subdirectories,
+                                              get_files_from_directory,
+                                              is_tracked, self)
+        indexed_files_info = self.indexed_files_info
+        for file in working_directory_tracked_files:
+            file_hash = calculate_hash(self, file)
+            if file_hash != indexed_files_info[file]:
+                modified_files.append(file)
+        return modified_files
+
+    @property
+    def files_ready_for_commit(self):
+        if not self.has_commits():
+            return self.indexed_files_info.keys()
+        files_ready_for_commit = []
+        indexed_files_info = self.indexed_files_info
+        tree = get_commit_tree(self, self.current_commit)
+        files_from_commit = get_info_from_commit_tree(self, tree)
+        for indexed_file_info in indexed_files_info:
+            if indexed_file_info in files_from_commit:
+                if (indexed_files_info[indexed_file_info] !=
+                        files_from_commit[indexed_file_info]):
+                    files_ready_for_commit.append(indexed_file_info)
+            else:
+                files_ready_for_commit.append(indexed_file_info)
+        return files_ready_for_commit

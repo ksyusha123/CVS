@@ -3,7 +3,6 @@ import os
 import hashlib
 from pathlib import Path
 
-from commands.status import get_files_ready_for_commit
 from command import Command
 
 
@@ -18,7 +17,7 @@ class CommitCommand(Command):
 
     def execute(self, message):
         repository = self.get_repo()
-        if len(get_files_ready_for_commit(repository)) == 0:
+        if len(repository.files_ready_for_commit) == 0:
             click.echo("No files added")
             return
         root_hash = self._make_graph(repository.path, repository)
@@ -44,11 +43,6 @@ class CommitCommand(Command):
             graph.write(tree_file_content)
         return graph_hash
 
-    @staticmethod
-    def _generate_random_filename():
-        letters = string.ascii_lowercase
-        rand_string = ''.join(random.choice(letters) for _ in range(10))
-        return rand_string
 
     @staticmethod
     def _get_info_from_index(file, repository):
