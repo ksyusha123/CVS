@@ -4,7 +4,8 @@ from os.path import relpath
 
 
 from command import Command
-from file_manager import compress_file, calculate_hash
+from file_manager import calculate_hash
+from compressor import Compressor
 
 
 @click.command(help="Indexes files")
@@ -67,5 +68,6 @@ class AddCommand(Command):
     @staticmethod
     def _create_blob(file_hash, repository, file):
         with open(Path(repository.objects / file_hash), 'wb') as obj:
-            compressed_content = compress_file(repository, file)
+            filepath = Path(file).resolve()
+            compressed_content = Compressor().compress_file(filepath)
             obj.write(compressed_content)

@@ -1,9 +1,9 @@
 from pathlib import Path
-import zlib
 import hashlib
-from multiprocessing import Pool
 from collections import deque
 from os.path import relpath, getsize
+
+from compressor import Compressor
 
 
 def delete_directory(directory):
@@ -61,15 +61,8 @@ def update_working_directory(repository):
             name, file_hash = file_data[0], file_data[1]
             old_file = Path(repository.objects / file_hash)
             current_file = Path(repository.path / name)
-            current_file.write_bytes(_decompress_file(repository, old_file))
-
-
-def compress_file(repository, file):
-    file_parts = _split_file(repository, file)
-    with Pool() as pool:
-        compressed_file_parts = pool.map(_compress_content,
-                                         file_parts)
-    return b'--new-part--'.join(compressed_file_parts)
+            current_file.write_bytes(
+                Compressor().decompress_file(repository, old_file))
 
 
 def get_subdirectories(repository, directory):
@@ -139,43 +132,3 @@ def _get_blobs(repository, tree):
             if filetype == 'blob':
                 blobs.add((name, file_hash))
     return blobs
-
-
-def _decompress_file(repository, file):
-    file_parts = _split_bytes_file(repository, file)
-    with Pool() as pool:
-        decompressed_file_parts = pool.map(_decompress_content,
-                                           file_parts)
-    return b''.join(decompressed_file_parts)
-
-
-def _decompress_content(content):
-    decompress_obj = zlib.decompressobj()
-    decompressed_content = decompress_obj.decompress(content)
-    return decompressed_content
-
-
-def _split_bytes_file(repository, file):
-    parts = []
-    with open(Path(repository.path / file), 'rb') as f:
-        content = f.read()
-        split_content = content.split(b'--new-part--')
-        parts += split_content
-    return parts
-
-
-def _compress_content(content):
-    compress_obj = zlib.compressobj(level=9)
-    compressed_content = compress_obj.compress(content)
-    return compressed_content
-
-
-def _split_file(repository, file):
-    parts = []
-    with open(Path(repository.path / file), 'rb') as f:
-        while True:
-            content = f.read(1048576)
-            if not content:
-                break
-            parts.append(content)
-    return parts
