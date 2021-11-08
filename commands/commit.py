@@ -43,7 +43,6 @@ class CommitCommand(Command):
             graph.write(tree_file_content)
         return graph_hash
 
-
     @staticmethod
     def _get_info_from_index(file, repository):
         with open(repository.index) as index:
@@ -90,5 +89,3 @@ class CommitCommand(Command):
             current_branch = head.readline()
             with open(Path(repository.cvs / current_branch), 'w') as current:
                 current.write(commit_hash)
-
-
