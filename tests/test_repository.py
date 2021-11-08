@@ -1,5 +1,6 @@
 import unittest
 from pathlib import Path
+from os.path import relpath
 from unittest.mock import patch, PropertyMock
 
 from repository import Repository
@@ -28,7 +29,9 @@ class TestRepositorySimple(unittest.TestCase):
         assert self.repository.is_initialised
 
     def test_current_position(self):
-        assert "refs\\heads\\master" == self.repository.current_position.path
+        assert relpath(Path(self.repository.heads / "master"),
+                       self.repository.cvs) == \
+               self.repository.current_position.path
     #
     # def test_current_position_with_type(self):
     #     self.assertEqual(("master", PositionType.branch),
@@ -74,7 +77,8 @@ class TestRepositoryAfterCommit(unittest.TestCase):
         current_commit = self.repository.current_commit
         self.assertTrue(current_commit.isalnum() and
                         len(current_commit) == 40 and
-                        "\\" not in current_commit)
+                        "\\" not in current_commit and
+                        "/" not in current_commit)
 
     def test_has_commits(self):
         self.assertTrue(self.repository.has_commits())

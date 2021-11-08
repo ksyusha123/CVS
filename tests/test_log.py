@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from test_command_base import TestCommand
 from commands.add import AddCommand
@@ -61,4 +61,3 @@ class TestLog(TestCommand):
         assert 'initial commit' in commits_log_messages
         assert 'second commit in master' not in commits_log_messages
         assert 'second commit in new_branch' in commits_log_messages
-

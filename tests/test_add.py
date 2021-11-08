@@ -36,8 +36,9 @@ class TestAdd(TestCommand):
         file2.touch()
         AddCommand().execute('directory')
         with open(self.repository.index) as index:
-            assert relpath(file1, Path.cwd()) == index.readline().split()[0]
-            assert relpath(file2, Path.cwd()) == index.readline().split()[0]
+            assert \
+                {relpath(file1, Path.cwd()), relpath(file2, Path.cwd())} == \
+                {index.readline().split()[0], index.readline().split()[0]}
         delete_directory(Path('directory'))
 
     def test_add_directory_with_subdirectories(self):
@@ -51,7 +52,8 @@ class TestAdd(TestCommand):
         file2.touch()
         AddCommand().execute('directory')
         with open(self.repository.index) as index:
-            assert {'directory\\file1', 'directory\\subdirectory\\file2'} == \
+            assert {relpath(Path(file1), Path.cwd()), relpath(Path(file2),
+                                                              Path.cwd())} == \
                    {index.readline().split()[0], index.readline().split()[0]}
         delete_directory(directory)
 
