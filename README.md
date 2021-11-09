@@ -30,10 +30,7 @@
 - модуль с логикой промежуточной работы с файлами: file_manager.py  
 - файл, с помощью которого из консоли можно вызывать модули: setup.py  
 
-## Установка    
-pip install virtualenv  
-virtualenv venv  
-venv/bin/activate  
+## Установка      
 pip install --editable .  
 
 ## Использование  
