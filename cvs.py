@@ -16,13 +16,15 @@ def cvs():
     pass
 
 
-cvs.add_command(log.log)
-cvs.add_command(init.init)
-cvs.add_command(add.add)
-cvs.add_command(commit.commit)
-cvs.add_command(reset.reset)
-cvs.add_command(branch.branch)
-cvs.add_command(checkout.checkout)
-cvs.add_command(tag.tag)
-cvs.add_command(status.status)
-cvs.add_command(squash.squash)
+def main():
+    cvs.add_command(log.log)
+    cvs.add_command(init.init)
+    cvs.add_command(add.add)
+    cvs.add_command(commit.commit)
+    cvs.add_command(reset.reset)
+    cvs.add_command(branch.branch)
+    cvs.add_command(checkout.checkout)
+    cvs.add_command(tag.tag)
+    cvs.add_command(status.status)
+    cvs.add_command(squash.squash)
+    cvs()

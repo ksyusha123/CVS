@@ -7,11 +7,10 @@ setup(
     include_package_data=True,
     install_requires=[
         'Click',
-        'Checksumdir'
     ],
     entry_points={
         'console_scripts': [
-            'cvs = cvs'
+            'cvs = cvs:main'
         ],
     },
 )
