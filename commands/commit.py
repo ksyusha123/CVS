@@ -1,5 +1,4 @@
 import click
-import os
 import hashlib
 from pathlib import Path
 
@@ -53,14 +52,13 @@ class CommitCommand(Command):
 
     def _create_commit_object(self, root_hash, repository, message):
         parent = self._find_parent_commit(repository)
-        with open(Path(repository.objects / 'tmp'), 'w') as commit_obj:
-            commit_obj.write(f"tree {root_hash}\n")
-            if parent is not None:
-                commit_obj.write(f"parent {parent}\n")
-            commit_obj.write(f"\n{message}")
-        commit_hash = self._calculate_hash(Path(repository.objects / 'tmp'))
-        os.rename(Path(repository.objects / 'tmp'),
-                  Path(repository.objects / commit_hash))
+        commit_obj_content = f"tree {root_hash}\n"
+        if parent is not None:
+            commit_obj_content += f"parent {parent}\n"
+        commit_obj_content += f"\n{message}"
+        commit_hash = hashlib.sha1(commit_obj_content.encode()).hexdigest()
+        with open(Path(repository.objects / commit_hash), 'w') as commit_obj:
+            commit_obj.write(commit_obj_content)
         return commit_hash
 
     @staticmethod
@@ -74,12 +72,6 @@ class CommitCommand(Command):
                     if current_commit != "":
                         parent = current_commit
         return parent
-
-    @staticmethod
-    def _calculate_hash(file_path):
-        with open(file_path, 'rb') as binary_file:
-            file_hash = hashlib.sha1(binary_file.read()).hexdigest()
-        return file_hash
 
     @staticmethod
     def _direct_current_branch(commit_hash, repository):

@@ -7,6 +7,11 @@ from commands.tag import TagCommand
 
 class TestTag(TestCommand):
 
+    @patch('commands.tag.TagCommand._print_all_tags')
+    def test_list_of_all_tags(self, mock_print_tags):
+        TagCommand().execute(None)
+        mock_print_tags.assert_called_once()
+
     @patch('repository.Repository.all_tags', new_callable=PropertyMock)
     def test_cannot_create_tag_if_name_exists(self, mock_all_tags):
         mock_all_tags.return_value = {"tag"}

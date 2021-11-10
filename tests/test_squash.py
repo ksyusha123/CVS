@@ -18,16 +18,23 @@ class TestSquash(TestCommand):
     def test_squash(self):
         Path('file').touch()
         AddCommand().execute('file')
-        CommitCommand().execute('initial')
+        CommitCommand().execute('first')
         initial_commit = self.repository.current_commit
         with open(Path('file'), 'w') as f:
             f.write('text')
         AddCommand().execute('file')
         CommitCommand().execute('second')
-        SquashCommand().execute(1)
+        with open(Path('file'), 'w') as f:
+            f.write('other text')
+        AddCommand().execute('file')
+        CommitCommand().execute('third')
+        SquashCommand().execute(2)
         with open(Path('file')) as f:
-            assert 'text' == f.readline()
-        assert initial_commit == self.repository.current_commit
+            assert 'other text' == f.readline()
+        with open(Path(self.repository.objects /
+                       self.repository.current_commit)) as current:
+            parent = current.readlines()[1].split()[1]
+        assert initial_commit == parent
         Path('file').unlink()
 
     # def test_cannot_squash_if_wrong_number_of_params(self):
