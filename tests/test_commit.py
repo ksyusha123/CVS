@@ -56,3 +56,6 @@ class TestCommit(unittest.TestCase):
             actual_parent_commit = \
                 child.readlines()[1].split()[1].split('\n')[0]
         assert expected_parent_commit == actual_parent_commit
+
+    # def test_commit_must_not_make_graph_of_cvs(self):
+    #     #todo

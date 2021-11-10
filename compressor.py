@@ -37,6 +37,7 @@ class Compressor:
     def _compress_content(content):
         compress_obj = zlib.compressobj(level=9)
         compressed_content = compress_obj.compress(content)
+        compressed_content += compress_obj.flush()
         return compressed_content
 
     @staticmethod

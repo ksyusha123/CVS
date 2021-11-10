@@ -62,7 +62,7 @@ def update_working_directory(repository):
             old_file = Path(repository.objects / file_hash)
             current_file = Path(repository.path / name)
             current_file.write_bytes(
-                Compressor().decompress_file(repository, old_file))
+                Compressor().decompress_file(old_file))
 
 
 def get_subdirectories(repository, directory):
