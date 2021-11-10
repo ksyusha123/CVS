@@ -18,9 +18,8 @@ class StatusCommand(Command):
         self._print_modified_files(repository)
 
     @staticmethod
-    def _print_files(repository, get_files, message_if_no_files,
+    def _print_files(files, message_if_no_files,
                      message):
-        files = get_files(repository)
         if len(files) == 0:
             click.echo(message_if_no_files)
         else:
@@ -30,21 +29,22 @@ class StatusCommand(Command):
         click.echo()
 
     def _print_modified_files(self, repository):
-        self._print_files(repository, repository.get_modified_files,
+        self._print_files(repository.modified_files,
                           "Working tree clean",
                           "Files not staged for commit:")
 
     def _print_files_ready_for_commit(self, repository):
-        self._print_files(repository, repository.files_ready_for_commit,
+        self._print_files(repository.files_ready_for_commit,
                           "Nothing to commit",
                           "Files ready for commit:")
 
     def _print_untracked_files(self, repository):
-        self._print_files(repository, repository.untracked_files,
+        self._print_files(repository.untracked_files,
                           "No untracked files",
                           "Untracked files:")
 
     @staticmethod
     def _print_current_position(repository):
         current_position = repository.current_position
-        click.echo(f"On {current_position.type} {current_position.name}\n")
+        click.echo(
+            f"On {current_position.type.name} {current_position.name}\n")

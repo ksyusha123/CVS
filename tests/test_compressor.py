@@ -28,7 +28,7 @@ class TestCompressor(unittest.TestCase):
 
     def test_decompress_big_file(self):
         with open(self.file, 'w') as f:
-            for _ in range(1000):
+            for _ in range(2000000):
                 f.write("abababababab")
         compressed_content = Compressor().compress_file(self.file)
         with open(self.compressed_file, 'wb') as compressed:
